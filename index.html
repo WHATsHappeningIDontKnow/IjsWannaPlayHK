@@ -233,15 +233,12 @@
                 let currentTheme = localStorage.getItem('celestrium-theme') || 'light';
                 let animationsEnabled = localStorage.getItem('celestrium-animations') !== 'false';
 
-                // Apply saved theme on load
                 document.body.className = currentTheme;
                 logo.src = currentTheme === 'dark' ? './assets/logos/logo-dark.png?login.live.com' : './assets/logos/logo-light.png?login.live.com';
 
-                // Apply saved tab title on load
                 const savedTitle = localStorage.getItem('celestrium-tab-title');
                 if (savedTitle) document.title = savedTitle;
 
-                // Apply saved favicon on load
                 const savedFavicon = localStorage.getItem('celestrium-tab-favicon');
                 if (savedFavicon) setFavicon(savedFavicon);
 
@@ -262,27 +259,23 @@
 
                 logoBtn.addEventListener('click', () => showPage('home'));
 
-                // Listen for messages from iframes
                 window.addEventListener('message', (e) => {
                     if (e.data.type === 'openItem') {
                         pageIframe.style.display = 'none';
                         gameContainer.style.display = 'flex';
                         gameIframe.src = e.data.url;
                     } else if (e.data.type === 'triggerKeybind') {
-                        // Trigger escape navigation from any iframe
                         window.location.href = 'https://nsd.schoology.com';
                     } else if (e.data.type === 'themeChange') {
                         currentTheme = e.data.theme;
                         localStorage.setItem('celestrium-theme', currentTheme);
                         document.body.className = currentTheme;
                         logo.src = currentTheme === 'dark' ? './assets/logos/logo-dark.png?login.live.com' : './assets/logos/logo-light.png?login.live.com';
-                        // Broadcast to all iframes
                         if (pageIframe) pageIframe.contentWindow.postMessage({type: 'themeChange', theme: currentTheme}, '*');
                         if (gameIframe) gameIframe.contentWindow.postMessage({type: 'themeChange', theme: currentTheme}, '*');
                     } else if (e.data.type === 'animationsChange') {
                         animationsEnabled = e.data.enabled;
                         localStorage.setItem('celestrium-animations', animationsEnabled ? 'true' : 'false');
-                        // Broadcast animations change to all iframes
                         if (pageIframe) pageIframe.contentWindow.postMessage({type: 'animationsChange', enabled: animationsEnabled}, '*');
                         if (gameIframe) gameIframe.contentWindow.postMessage({type: 'animationsChange', enabled: animationsEnabled}, '*');
                     } else if (e.data.type === 'saveKeybind') {
@@ -304,10 +297,8 @@
                         if (ORIGINAL_FAV_HREF) setFavicon(ORIGINAL_FAV_HREF);
                         localStorage.removeItem('celestrium-tab-favicon');
                     } else if (e.data.type === 'pageLoaded') {
-                        // When a page loads, send it the current theme and animations state
                         e.source.postMessage({type: 'themeChange', theme: currentTheme}, '*');
                         e.source.postMessage({type: 'animationsChange', enabled: animationsEnabled}, '*');
-                        // Send version to settings page
                         const version = document.querySelector('meta[name="app-version"]')?.content;
                         e.source.postMessage({type: 'versionUpdate', version: version}, '*');
                     }
@@ -359,7 +350,6 @@
                     }
                 });
 
-                // Control bar button event listeners
                 let isFullscreen = false;
                 fullscreenBtn.addEventListener('click', () => {
                     isFullscreen = !isFullscreen;
@@ -382,7 +372,6 @@
                     const currentUrl = gameIframe.src;
                     const cleanUrl = currentUrl.split('?')[0];
                     
-                    // Open the game in an about:blank tab
                     const newTab = window.open('about:blank');
                     newTab.document.write(`
                         <!DOCTYPE html>
