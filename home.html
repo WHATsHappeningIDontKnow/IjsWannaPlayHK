@@ -1,152 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Celestrium Online | Home</title>
-    <link rel="stylesheet" href="./all.css?login.live.com">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* High-End Title Styling */
-        .hero h1 {
-            font-size: 5rem;
-            font-weight: 800;
-            letter-spacing: -3.5px; /* Tight, modern kerning */
-            margin: 0 0 10px 0;
-            line-height: 1;
-            /* Vertical gradient from main text to subtext */
-            background: linear-gradient(180deg, var(--text) 30%, var(--subtext) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            /* Smooth entrance animation */
-            animation: titleFadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        @keyframes titleFadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .home-features { 
-            margin-top: 28px; 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 24px; 
-            align-items: stretch; 
-            justify-items: center; 
-        }
-        .home-features > .side-actions { display: flex; align-items: stretch; }
-        .side-actions { min-width: 0; }
-        .editors-wrapper { 
-            min-width: 0; 
-            background: var(--card); 
-            padding: 28px; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 28px rgba(0,0,0,0.05); 
-            display:flex; 
-            flex-direction:column; 
-            min-height:220px; 
-            position:relative; 
-            width:100%; 
-            max-width:1400px; 
-        }
-        .editors-wrapper h2 { margin: 0 0 12px 0; font-size: 1.5rem; }
-        .editor-carousel { 
-            flex:1; 
-            display:flex; 
-            align-items:center; 
-            gap:10px; 
-            min-width: 0; 
-            overflow: hidden; 
-            min-height: 180px; 
-        }
-        .carousel-track { 
-            display:flex; 
-            gap:12px; 
-            overflow: hidden; 
-            scroll-behavior:smooth; 
-            -webkit-overflow-scrolling: touch; 
-            padding:12px; 
-            min-width: 0; 
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .carousel-track::-webkit-scrollbar { width: 0; height: 0; display: none; }
-        .marquee { display:block; width:100%; overflow:hidden; position:relative; }
-        .marquee-inner { display:flex; gap:12px; align-items:center; will-change: transform; }
-        .carousel-item { 
-            display:flex; 
-            flex-direction:column; 
-            align-items:center; 
-            justify-content:center; 
-            min-width:170px; 
-            max-width:220px; 
-            padding:16px; 
-            border-radius:12px; 
-            background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); 
-            border:1px solid rgba(0,0,0,0.06); 
-            cursor:pointer; 
-            text-align:center; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
-            transition: transform .18s ease, box-shadow .18s ease; 
-        }
-        .carousel-item.hoverable:hover { 
-            transform: translateY(-6px); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-        }
-        .carousel-item img { 
-            width:72px; 
-            height:72px; 
-            object-fit:contain; 
-            margin-bottom:12px; 
-            border-radius:10px; 
-            background: rgba(255,255,255,0.02); 
-            padding:10px; 
-        }
-        .carousel-title { font-weight:800; font-size:1rem; color: var(--text); }
-        .play-random-card { 
-            display:flex; 
-            flex-direction:column; 
-            align-items:center; 
-            justify-content:center; 
-            gap:12px; 
-            padding:28px; 
-            height:100%; 
-            min-height:220px; 
-        }
-        .play-random-btn { 
-            background: linear-gradient(90deg, var(--accent), #3a7bd5); 
-            color: white; 
-            border: none; 
-            padding: 14px 22px; 
-            border-radius: 12px; 
-            font-weight: 800; 
-            font-size: 1.06rem; 
-            cursor: pointer; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 10px; 
-            box-shadow: 0 8px 22px rgba(74,144,226,0.18); 
-            transition: transform .12s, box-shadow .12s, opacity .12s; 
-            width:100%; 
-            justify-content:center; 
-        }
-        .play-random-btn.hoverable:hover { 
-            transform: translateY(-4px); 
-            box-shadow: 0 14px 40px rgba(74,144,226,0.24); 
-        }
-        .play-random-btn i { font-size: 1.15rem; }
-        @media (max-width: 860px) {
-            .home-features { display: block; }
-            .editors-wrapper { margin-bottom: 12px; padding: 14px; }
-            .play-random-card { width: 100%; }
-        }
-        @media (min-width: 1400px) {
-            .carousel-item { min-width:220px; max-width:260px; padding:18px; }
-            .carousel-item img { width:84px; height:84px; }
-            .editor-carousel { gap:18px; }
-        }
-    </style>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Celestrium Online | Home</title>
+        <link rel="stylesheet" href="./all.css?login.live.com">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        
+        <!-- BLOCKING SCRIPT: Check animations setting before render to prevent flash -->
+        <script>
+            try {
+                if (localStorage.getItem('celestrium-animations') === 'false') {
+                    document.documentElement.classList.add('no-animations');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        </script>
+    
+        <style>
+            /* Base Hero Styles (No Animation) */
+            .hero h1 {
+                font-size: 5rem;
+                font-weight: 800;
+                letter-spacing: -3.5px;
+                margin: 0 0 10px 0;
+                line-height: 1;
+                background: linear-gradient(180deg, var(--text) 30%, var(--subtext) 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+    
+            /* Animation Only Applied if NOT disabled */
+            html:not(.no-animations) .hero h1 {
+                animation: titleFadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            }
+    
+            /* Global Animation Killer if class is present */
+            html.no-animations *, html.no-animations *::before, html.no-animations *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+    
+            @keyframes titleFadeUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+    
+            /* --- REST OF YOUR ORIGINAL STYLING --- */
+            .home-features { 
+                margin-top: 28px; 
+                display: grid; 
+                grid-template-columns: 1fr; 
+                gap: 24px; 
+                align-items: stretch; 
+                justify-items: center; 
+            }
+            .home-features > .side-actions { display: flex; align-items: stretch; }
+            .side-actions { min-width: 0; }
+            .editors-wrapper { 
+                min-width: 0; 
+                background: var(--card); 
+                padding: 28px; 
+                border-radius: 12px; 
+                box-shadow: 0 8px 28px rgba(0,0,0,0.05); 
+                display:flex; 
+                flex-direction:column; 
+                min-height:220px; 
+                position:relative; 
+                width:100%; 
+                max-width:1400px; 
+            }
+            .editors-wrapper h2 { margin: 0 0 12px 0; font-size: 1.5rem; }
+            .editor-carousel { 
+                flex:1; 
+                display:flex; 
+                align-items:center; 
+                gap:10px; 
+                min-width: 0; 
+                overflow: hidden; 
+                min-height: 180px; 
+            }
+            .carousel-track { 
+                display:flex; 
+                gap:12px; 
+                overflow: hidden; 
+                scroll-behavior:smooth; 
+                -webkit-overflow-scrolling: touch; 
+                padding:12px; 
+                min-width: 0; 
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            .carousel-track::-webkit-scrollbar { width: 0; height: 0; display: none; }
+            .marquee { display:block; width:100%; overflow:hidden; position:relative; }
+            .marquee-inner { display:flex; gap:12px; align-items:center; will-change: transform; }
+            .carousel-item { 
+                display:flex; 
+                flex-direction:column; 
+                align-items:center; 
+                justify-content:center; 
+                min-width:170px; 
+                max-width:220px; 
+                padding:16px; 
+                border-radius:12px; 
+                background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); 
+                border:1px solid rgba(0,0,0,0.06); 
+                cursor:pointer; 
+                text-align:center; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+                transition: transform .18s ease, box-shadow .18s ease; 
+            }
+            /* Hover effects are killed automatically by the global rule above if no-animations is set */
+            .carousel-item.hoverable:hover { 
+                transform: translateY(-6px); 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            }
+            .carousel-item img { 
+                width:72px; 
+                height:72px; 
+                object-fit:contain; 
+                margin-bottom:12px; 
+                border-radius:10px; 
+                background: rgba(255,255,255,0.02); 
+                padding:10px; 
+            }
+            .carousel-title { font-weight:800; font-size:1rem; color: var(--text); }
+            .play-random-card { 
+                display:flex; 
+                flex-direction:column; 
+                align-items:center; 
+                justify-content:center; 
+                gap:12px; 
+                padding:28px; 
+                height:100%; 
+                min-height:220px; 
+            }
+            .play-random-btn { 
+                background: linear-gradient(90deg, var(--accent), #3a7bd5); 
+                color: white; 
+                border: none; 
+                padding: 14px 22px; 
+                border-radius: 12px; 
+                font-weight: 800; 
+                font-size: 1.06rem; 
+                cursor: pointer; 
+                display: inline-flex; 
+                align-items: center; 
+                gap: 10px; 
+                box-shadow: 0 8px 22px rgba(74,144,226,0.18); 
+                transition: transform .12s, box-shadow .12s, opacity .12s; 
+                width:100%; 
+                justify-content:center; 
+            }
+            .play-random-btn.hoverable:hover { 
+                transform: translateY(-4px); 
+                box-shadow: 0 14px 40px rgba(74,144,226,0.24); 
+            }
+            .play-random-btn i { font-size: 1.15rem; }
+            @media (max-width: 860px) {
+                .home-features { display: block; }
+                .editors-wrapper { margin-bottom: 12px; padding: 14px; }
+                .play-random-card { width: 100%; }
+            }
+            @media (min-width: 1400px) {
+                .carousel-item { min-width:220px; max-width:260px; padding:18px; }
+                .carousel-item img { width:84px; height:84px; }
+                .editor-carousel { gap:18px; }
+            }
+        </style>
+    </head>
 <body>
     <div class="page">
         <div class="hero">
