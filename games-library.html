@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Utilities</title>
+    <title>Games Library</title>
     <style>
         :root {
             /* Dark Theme (Default) */
@@ -24,7 +24,7 @@
             --text-primary: #000000;
             --text-secondary: #8e8e93;
             --card-hover-bg: #f2f2f7;
-            --accent: #0a84ff;
+            --accent: #007aff;
             --input-bg: #e5e5ea;
             --border-color: #d1d1d6;
         }
@@ -131,14 +131,14 @@
             font-weight: 500;
         }
 
-        /* Utilities Grid */
-        .items-grid {
+        /* Games Grid */
+        .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
         }
 
-        .item-card {
+        .game-card {
             background-color: var(--section-bg);
             border-radius: 16px;
             padding: 16px;
@@ -151,34 +151,34 @@
             border: 1px solid transparent;
         }
 
-        body.light .item-card {
+        body.light .game-card {
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 10px rgba(0,0,0,0.03);
         }
 
         /* HOVER EFFECTS - ONLY IF ANIMATIONS ON */
-        body:not(.no-animations) .item-card:hover {
+        body:not(.no-animations) .game-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             z-index: 2;
         }
 
         /* HOVER EFFECTS - FALLBACK IF ANIMATIONS OFF */
-        body.no-animations .item-card:hover {
+        body.no-animations .game-card:hover {
             transform: none;
             box-shadow: none;
         }
-
+        
         /* Background color change happens regardless of animation setting */
-        .item-card:hover {
-             background-color: var(--card-hover-bg);
+        .game-card:hover {
+            background-color: var(--card-hover-bg);
         }
 
-        body.light:not(.no-animations) .item-card:hover {
+        body.light:not(.no-animations) .game-card:hover {
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
 
-        .item-icon-wrapper {
+        .game-icon-wrapper {
             width: 100%;
             aspect-ratio: 1/1;
             border-radius: 12px;
@@ -188,7 +188,7 @@
             position: relative;
         }
 
-        .item-icon {
+        .game-icon {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -196,16 +196,16 @@
         }
 
         /* ICON SCALE - ONLY IF ANIMATIONS ON */
-        body:not(.no-animations) .item-card:hover .item-icon {
+        body:not(.no-animations) .game-card:hover .game-icon {
             transform: scale(1.05);
         }
 
-        .item-info {
+        .game-info {
             display: flex;
             flex-direction: column;
         }
 
-        .item-title {
+        .game-title {
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 4px;
@@ -215,7 +215,7 @@
             color: var(--text-primary);
         }
 
-        .item-category-label {
+        .game-category-label {
             font-size: 12px;
             color: var(--text-secondary);
             text-transform: capitalize;
@@ -239,27 +239,27 @@
 
     <div class="main-container">
         <header>
-            <h1>Utilities</h1>
+            <h1>Library</h1>
             
             <div class="search-wrapper">
                 <svg class="search-icon" viewBox="0 0 24 24">
                     <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                 </svg>
-                <input type="text" id="search" placeholder="Search Utilities..." autocomplete="off">
+                <input type="text" id="search" placeholder="Search Games..." autocomplete="off">
             </div>
         </header>
 
-        <div id="items-container">
+        <div id="games-container">
             <!-- Dynamic Content -->
         </div>
 
         <div id="no-results" class="no-results" style="display: none;">
-            No utilities found.
+            No games found.
         </div>
     </div>
 
     <!-- Required Scripts -->
-    <script src="./utilities/utilities.js?login.live.com"></script>
+    <script src="./games/games.js?login.live.com"></script>
     <script src="./search.js?login.live.com"></script>
 
     <script>
@@ -289,52 +289,50 @@
             });
 
             // --- Rendering Logic ---
-            const container = document.getElementById('items-container');
+            const container = document.getElementById('games-container');
             const noResults = document.getElementById('no-results');
+            
+            // Define display order for categories
+            const categoryOrder = [
+                'action', 'adventure', 'emulator', 'platformer', 'strategy', 'racing', 
+                'puzzle', 'sports', 'io', 'roblox', 'other'
+            ];
 
-            function render(itemsList) {
+            function render(gamesList) {
                 container.innerHTML = '';
                 let totalVisible = 0;
 
-                // 1. Group items dynamically by category
-                // Since utilities might not have fixed categories like games, we build them on the fly.
+                // 1. Group games by category
                 const groups = {};
-                const categories = new Set();
+                categoryOrder.forEach(c => groups[c] = []); // Initialize structure
 
-                itemsList.forEach(item => {
-                    let cat = (item.category || 'General').toLowerCase();
-                    // Capitalize first letter for internal key consistency
-                    cat = cat.charAt(0).toUpperCase() + cat.slice(1);
-                    
-                    if (!groups[cat]) {
-                        groups[cat] = [];
-                        categories.add(cat);
-                    }
-                    groups[cat].push(item);
+                gamesList.forEach(game => {
+                    // Normalize category
+                    let cat = (game.category || 'other').toLowerCase();
+                    if (!groups[cat]) cat = 'other'; // Catch-all
+                    groups[cat].push(game);
                 });
 
-                const sortedCategories = Array.from(categories).sort();
-
                 // 2. Build HTML
-                sortedCategories.forEach(cat => {
-                    const itemsInCat = groups[cat];
-                    if (itemsInCat.length > 0) {
-                        totalVisible += itemsInCat.length;
+                categoryOrder.forEach(cat => {
+                    const gamesInCat = groups[cat];
+                    if (gamesInCat.length > 0) {
+                        totalVisible += gamesInCat.length;
 
                         const section = document.createElement('div');
                         section.className = 'category-section';
 
-                        // Header
+                        // Header (No Emojis, Clean Look)
                         const header = document.createElement('div');
                         header.className = 'category-header';
                         
                         const title = document.createElement('div');
                         title.className = 'category-title';
-                        title.textContent = cat;
+                        title.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
 
                         const count = document.createElement('div');
                         count.className = 'category-count';
-                        count.textContent = itemsInCat.length;
+                        count.textContent = gamesInCat.length;
 
                         header.appendChild(title);
                         header.appendChild(count);
@@ -342,23 +340,23 @@
 
                         // Grid
                         const grid = document.createElement('div');
-                        grid.className = 'items-grid';
+                        grid.className = 'games-grid';
 
-                        itemsInCat.forEach(item => {
+                        gamesInCat.forEach(game => {
                             const link = document.createElement('a');
-                            link.href = item.url;
-                            link.className = 'item-card';
+                            link.href = game.url;
+                            link.className = 'game-card';
                             
                             // Improve icon path logic
-                            const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png` : `${item.url}/favicon.png`;
+                            const iconPath = game.url.endsWith('/') ? `${game.url}favicon.png` : `${game.url}/favicon.png`;
 
                             link.innerHTML = `
-                                <div class="item-icon-wrapper">
-                                    <img src="${iconPath}" alt="${item.name}" class="item-icon"">
+                                <div class="game-icon-wrapper">
+                                    <img src="${iconPath}" alt="${game.name}" class="game-icon"">
                                 </div>
-                                <div class="item-info">
-                                    <div class="item-title">${item.name}</div>
-                                    <div class="item-category-label">${cat}</div>
+                                <div class="game-info">
+                                    <div class="game-title">${game.name}</div>
+                                    <div class="game-category-label">${cat}</div>
                                 </div>
                             `;
                             grid.appendChild(link);
@@ -376,23 +374,21 @@
                     noResults.style.display = 'none';
                 }
             }
-            
+
             (function() {
-            // --- Theme & System Initialization ---
-            const savedTheme = localStorage.getItem('celestrium-theme') || 'dark';
-            document.body.className = savedTheme;
+                // --- Theme & System Initialization ---
+                const savedTheme = localStorage.getItem('celestrium-theme') || 'dark';
+                document.body.className = savedTheme;
 
-            // NEW: Check for animations setting (Default is true if null)
-            const animsSetting = localStorage.getItem('celestrium-animations');
-            // If explicitly "false", disable them. Otherwise keep enabled.
-            if (animsSetting === 'false') {
-                document.body.classList.add('no-animations');
-            }
+                // NEW: Check for animations setting (Default is true if null or "true")
+                const animsSetting = localStorage.getItem('celestrium-animations');
+                // If explicitly "false", disable them.
+                if (animsSetting === 'false') {
+                    document.body.classList.add('no-animations');
+                }
 
-            // Signal Loaded
-            if (window.parent) {
-                window.parent.postMessage({type: 'pageLoaded'}, '*');
-            }})();
+                // ... existing initialization code ...
+            })();
 
             // --- Search Functionality ---
             const searchInput = document.getElementById('search');
@@ -400,24 +396,25 @@
                 const term = e.target.value.toLowerCase().trim();
                 
                 if (!term) {
-                    render(utilities);
+                    render(games);
                 } else {
-                    const filtered = utilities.filter(u => 
-                        u.name.toLowerCase().includes(term) || 
-                        (u.category && u.category.toLowerCase().includes(term))
+                    const filtered = games.filter(g => 
+                        g.name.toLowerCase().includes(term) || 
+                        (g.category && g.category.toLowerCase().includes(term))
                     );
                     render(filtered);
                 }
             });
 
             // Initial Render
-            if (typeof utilities !== 'undefined') {
-                render(utilities);
+            if (typeof games !== 'undefined') {
+                render(games);
             }
 
             // --- Keybind Logic ---
              document.addEventListener('keydown', e => {
                 if (document.activeElement.tagName === 'INPUT') return;
+
                 const kbJSON = localStorage.getItem('celestrium-keybind');
                 if (!kbJSON) return;
                 
