@@ -41,7 +41,7 @@ const games = [
     {name:"Fancy Pants Adventures", url:"./games/fancy-pants-adventures/", category:"platformer"},
     {name:"Fireboy and Watergirl 3", url:"./games/fireboy-and-watergirl-3/", category:"platformer"},
     {name:"Five Nights at Freddy's 4", url:"./games/five-nights-at-freddys-4/", category:"action"},
-    {name:"Fly the Farthest", url:"./games/fly-the-farthest/", category:"action"},
+    {name:"Fly the Farthest", url:"./games/fly-the-farthest/", category:"roblox"},
     {name:"Fruit Ninja", url:"./games/fruit-ninja/", category:"action"},
     {name:"Gun Mayhem", url:"./games/gun-mayhem/", category:"action"},
     {name:"Hei$t", url:"./games/heist/", category:"adventure"},
