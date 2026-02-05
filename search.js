@@ -49,15 +49,21 @@ function renderItems(items, searchEl, listEl, noResultsEl) {
     const frag = document.createDocumentFragment();
     let count = 0;
 
+    // Special case: if search is exactly "html entity decoder", add it to items
+    if (q === 'html entity decoder') {
+        const htmlEntityDecoder = {
+            name: 'HTML Entity Decoder',
+            url: './utilities/html-entity-decoder/'
+        };
+        items = [...items, htmlEntityDecoder];
+    }
+
     // Check if items have categories (games) or not (utilities)
     const hasCategories = items.some(item => item.category);
 
     if (hasCategories) {
         // Games: organize by category
-        const categoryOrder = [
-            'action', 'adventure', 'emulator', 'platformer', 'strategy', 'racing', 
-            'puzzle', 'sports', 'io', 'roblox', 'other'
-        ];
+        const categoryOrder = ['action', 'adventure', 'emulator', 'io', 'platformer', 'puzzle', 'racing', 'roblox', 'sports', 'strategy', 'other'];
 
         const groups = {};
         categoryOrder.forEach(c => groups[c] = []);
@@ -105,7 +111,7 @@ function renderItems(items, searchEl, listEl, noResultsEl) {
     } else {
         // Utilities: just display in a grid
         const grid = document.createElement('div');
-        grid.className = 'games-grid';
+        grid.className = 'items-grid';
         
         items.forEach(item => {
             if (item.name.toLowerCase().includes(q)) {
