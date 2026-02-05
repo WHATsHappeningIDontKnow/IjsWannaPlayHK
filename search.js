@@ -34,18 +34,58 @@ function renderItems(items, searchEl, listEl, noResultsEl) {
     const frag = document.createDocumentFragment();
     let count = 0;
 
-    // Create grid wrapper
-    const grid = document.createElement('div');
-    grid.className = 'games-grid';
+    // Define category order
+    const categoryOrder = [
+        'action', 'adventure', 'emulator', 'platformer', 'strategy', 'racing', 
+        'puzzle', 'sports', 'io', 'roblox', 'other'
+    ];
 
-    for (const item of items) {
+    // Group by category
+    const groups = {};
+    categoryOrder.forEach(c => groups[c] = []);
+    
+    items.forEach(item => {
         if (item.name.toLowerCase().includes(q)) {
-            grid.appendChild(createItemElement(item));
+            let cat = (item.category || 'other').toLowerCase();
+            if (!groups[cat]) cat = 'other';
+            groups[cat].push(item);
             count++;
         }
-    }
+    });
 
-    frag.appendChild(grid);
+    // Render each category section
+    categoryOrder.forEach(cat => {
+        if (groups[cat].length > 0) {
+            const section = document.createElement('div');
+            section.className = 'category-section';
+            
+            const header = document.createElement('div');
+            header.className = 'category-header';
+            
+            const title = document.createElement('div');
+            title.className = 'category-title';
+            title.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+            
+            const countEl = document.createElement('div');
+            countEl.className = 'category-count';
+            countEl.textContent = groups[cat].length;
+            
+            header.appendChild(title);
+            header.appendChild(countEl);
+            section.appendChild(header);
+            
+            const grid = document.createElement('div');
+            grid.className = 'games-grid';
+            
+            groups[cat].forEach(item => {
+                grid.appendChild(createItemElement(item));
+            });
+            
+            section.appendChild(grid);
+            frag.appendChild(section);
+        }
+    });
+
     listEl.appendChild(frag);
     noResultsEl.classList.toggle('hidden', count !== 0);
 }
