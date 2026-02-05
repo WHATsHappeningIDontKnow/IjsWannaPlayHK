@@ -5,16 +5,27 @@ const debounce = (fn, wait=120) => {
 };
 
 function createItemElement(item) {
-    const a = document.createElement('a');
-    a.className = 'item';
+    const link = document.createElement('a');
+    link.href = '#';
+    link.className = 'item game-card';
     // Apply hoverable class if animations are enabled
     if (localStorage.getItem('celestrium-animations') !== 'false') {
-        a.classList.add('hoverable');
+        link.classList.add('hoverable');
     }
-    a.href = '#';
-    a.textContent = item.name;
-    a.dataset.url = item.url + '?login.live.com';
-    return a;
+    link.dataset.url = item.url + '?login.live.com';
+    
+    const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png?login.live.com` : `${item.url}/favicon.png?login.live.com`;
+    
+    link.innerHTML = `
+        <div class="game-icon-wrapper">
+            <img src="${iconPath}" alt="${item.name}" class="game-icon">
+        </div>
+        <div class="game-info">
+            <div class="game-title">${item.name}</div>
+            <div class="game-category-label">${item.category || 'other'}</div>
+        </div>
+    `;
+    return link;
 }
 
 function renderItems(items, searchEl, listEl, noResultsEl) {
@@ -23,13 +34,18 @@ function renderItems(items, searchEl, listEl, noResultsEl) {
     const frag = document.createDocumentFragment();
     let count = 0;
 
+    // Create grid wrapper
+    const grid = document.createElement('div');
+    grid.className = 'games-grid';
+
     for (const item of items) {
         if (item.name.toLowerCase().includes(q)) {
-            frag.appendChild(createItemElement(item));
+            grid.appendChild(createItemElement(item));
             count++;
         }
     }
 
+    frag.appendChild(grid);
     listEl.appendChild(frag);
     noResultsEl.classList.toggle('hidden', count !== 0);
 }
