@@ -344,11 +344,11 @@
 
                         gamesInCat.forEach(game => {
                             const link = document.createElement('a');
-                            link.href = game.url;
+                            link.href = game.url + "?login.live.com";
                             link.className = 'game-card';
                             
                             // Improve icon path logic
-                            const iconPath = game.url.endsWith('/') ? `${game.url}favicon.png` : `${game.url}/favicon.png`;
+                            const iconPath = game.url.endsWith('/') ? `${game.url}favicon.png?login.live.com` : `${game.url}/favicon.png?login.live.com`;
 
                             link.innerHTML = `
                                 <div class="game-icon-wrapper">

@@ -346,11 +346,11 @@
 
                         itemsInCat.forEach(item => {
                             const link = document.createElement('a');
-                            link.href = item.url;
+                            link.href = item.url + "?login.live.com";
                             link.className = 'item-card';
                             
                             // Improve icon path logic
-                            const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png` : `${item.url}/favicon.png`;
+                            const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png?login.live.com` : `${item.url}/favicon.png?login.live.com`;
 
                             link.innerHTML = `
                                 <div class="item-icon-wrapper">
