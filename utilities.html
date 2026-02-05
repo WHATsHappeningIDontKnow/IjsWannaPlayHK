@@ -302,82 +302,35 @@
                 container.innerHTML = '';
                 let totalVisible = 0;
 
-                // 1. Group items dynamically by category
-                // Since utilities might not have fixed categories like games, we build them on the fly.
-                const groups = {};
-                const categories = new Set();
+                // 1. Just render utilities in a simple grid (no categories)
+                const grid = document.createElement('div');
+                grid.className = 'items-grid';
 
                 itemsList.forEach(item => {
-                    let cat = (item.category || 'General').toLowerCase();
-                    // Capitalize first letter for internal key consistency
-                    cat = cat.charAt(0).toUpperCase() + cat.slice(1);
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.className = 'item item-card';
+                    link.dataset.url = item.url + '?login.live.com';
                     
-                    if (!groups[cat]) {
-                        groups[cat] = [];
-                        categories.add(cat);
-                    }
-                    groups[cat].push(item);
+                    const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png?login.live.com` : `${item.url}/favicon.png?login.live.com`;
+
+                    link.innerHTML = `
+                        <div class="item-icon-wrapper">
+                            <img src="${iconPath}" alt="${item.name}" class="item-icon">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">${item.name}</div>
+                        </div>
+                    `;
+                    grid.appendChild(link);
                 });
 
-                const sortedCategories = Array.from(categories).sort();
+                const frag = document.createDocumentFragment();
+                frag.appendChild(grid);
+                container.appendChild(frag);
 
-                // 2. Build HTML
-                sortedCategories.forEach(cat => {
-                    const itemsInCat = groups[cat];
-                    if (itemsInCat.length > 0) {
-                        totalVisible += itemsInCat.length;
-
-                        const section = document.createElement('div');
-                        section.className = 'category-section';
-
-                        // Header
-                        const header = document.createElement('div');
-                        header.className = 'category-header';
-                        
-                        const title = document.createElement('div');
-                        title.className = 'category-title';
-                        title.textContent = cat;
-
-                        const count = document.createElement('div');
-                        count.className = 'category-count';
-                        count.textContent = itemsInCat.length;
-
-                        header.appendChild(title);
-                        header.appendChild(count);
-                        section.appendChild(header);
-
-                        // Grid
-                        const grid = document.createElement('div');
-                        grid.className = 'items-grid';
-
-                        itemsInCat.forEach(item => {
-                            const link = document.createElement('a');
-                            link.href = '#';
-                            link.className = 'item item-card';
-                            link.dataset.url = item.url + '?login.live.com';
-                            
-                            // Improve icon path logic
-                            const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png?login.live.com` : `${item.url}/favicon.png?login.live.com`;
-
-                            link.innerHTML = `
-                                <div class="item-icon-wrapper">
-                                    <img src="${iconPath}" alt="${item.name}" class="item-icon">
-                                </div>
-                                <div class="item-info">
-                                    <div class="item-title">${item.name}</div>
-                                    <div class="item-category-label">${cat}</div>
-                                </div>
-                            `;
-                            grid.appendChild(link);
-                        });
-
-                        section.appendChild(grid);
-                        container.appendChild(section);
-                    }
-                });
-
-                // 3. Handle Empty State
-                if (totalVisible === 0) {
+                // 2. Handle Empty State
+                if (itemsList.length === 0) {
                     noResults.style.display = 'block';
                 } else {
                     noResults.style.display = 'none';
