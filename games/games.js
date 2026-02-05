@@ -89,7 +89,7 @@ const games = [
     {name:"Stickman Hook", url:"./games/stickman-hook/", category:"platformer"},
     {name:"Stick Ninja Academy", url:"./games/sticky-ninja-academy", category:"action"},
     {name:"Stumble Guys", url:"./games/stumble-guys/", category:"platformer"},
-    {name:"Subway Surfers: San Francisco", url:"./games/subway-surfers", category:"action"},
+    {name:"Subway Surfers: San Francisco", url:"./games/subway-surfers-san-francisco", category:"action"},
     {name:"Super Mario Bros", url:"./games/super-mario-bros/", category:"emulator"},
     {name:"Super Smash Bros", url:"./games/super-smash-bros/", category:"emulator"},
     {name:"Swords and Souls", url:"./games/swords-and-souls/", category:"adventure"},
