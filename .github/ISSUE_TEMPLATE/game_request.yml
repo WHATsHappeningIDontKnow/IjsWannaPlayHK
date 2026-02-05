@@ -1,0 +1,56 @@
+name: Game Request
+description: Suggest a game to add to the site
+title: "Game Request: [Game Name Here]"
+labels: ["game-request"]
+assignees: ["celestrium-games"]
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for suggesting a game! Please fill out the form below."
+  
+  - type: input
+    id: game-name
+    attributes:
+      label: Name of Requested Game
+      description: The full name of the game that can be Googled
+    validations:
+      required: true
+  
+  - type: textarea
+    id: game-source
+    attributes:
+      label: Where This Game Can Be Found
+      description: Provide the link to the original, blocked version of the game. Alternatively, you could upload a file or folder to be added to the site, and we will do our best to include it.
+      placeholder: "https://... or leave as is if uploading a game file"
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: category
+    attributes:
+      label: Game Category
+      description: Select the category that best fits this game
+      options:
+        - action
+        - adventure
+        - emulator
+        - io
+        - platformer
+        - puzzle
+        - racing
+        - roblox
+        - sports
+        - strategy
+        - other
+    validations:
+      required: true
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Game Description
+      description: Brief description of what the game is about
+      placeholder: "Describe the game here..."
+    validations:
+      required: true

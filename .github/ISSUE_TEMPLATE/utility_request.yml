@@ -1,0 +1,36 @@
+name: Utility Request
+description: Suggest a utility tool to add to the site
+title: "Utility Request: [Utility Name Here]"
+labels: ["utility-request"]
+assignees: ["celestrium-games"]
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for suggesting a utility! Please fill out the form below."
+  
+  - type: input
+    id: utility-name
+    attributes:
+      label: Name of Requested Utility
+      description: The full name of the utility that can be Googled
+    validations:
+      required: true
+  
+  - type: textarea
+    id: utility-source
+    attributes:
+      label: Where This Utility Can Be Found
+      description: Provide the link to the original, blocked version of the utility. Alternatively, you could upload a file or folder to be added to the site, and we will do our best to include it.
+      placeholder: "https://... or leave as is if uploading a utility file"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What Does This Utility Do?
+      description: Brief description of what the utility is used for and what problems it solves
+      placeholder: "Describe the utility's purpose here..."
+    validations:
+      required: true

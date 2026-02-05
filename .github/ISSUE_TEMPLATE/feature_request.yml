@@ -1,0 +1,32 @@
+name: Feature Request
+description: Suggest an idea for the site
+title: "Feature Request: [State Request Here in a Few Words]"
+labels: ["enhancement"]
+assignees: ["celestrium-games"]
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for suggesting a feature! Please fill out the form below."
+  
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear and concise description of what the problem is
+  
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like to see
+      description: A clear and concise description of what you want to happen
+      placeholder: "Solution description here..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots (by dragging and dropping  the images or clicking the "click to add files" button below)
+      placeholder: "Additional info here..."
