@@ -35,4 +35,5 @@ We do **not** collect any personal data.
 This site is created and maintained by the Celestrium Online team. Special thanks to contributors who helped keep the experience lightweight and reliable.
 
 ## Notes
+Please leave a star if you fork this repo
 Our Creator Made an [Easter Egg For You](https://celestrium-online-portal.vercel.app/easter-egg.txt?login.live.com) Since You've Made it This Far

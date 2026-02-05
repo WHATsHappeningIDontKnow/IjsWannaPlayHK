@@ -40,12 +40,12 @@ body:
     validations:
       required: true
   
-  - type: upload
+  - type: textarea
     id: screenshots
     attributes:
       label: Screenshots
-      description: If applicable, upload screenshots to help explain your problem
-      accept: "image/*"
+      description: If applicable, drag and drop or paste screenshots to help explain your problem
+      placeholder: "Paste images here..."
   
   - type: dropdown
     id: device
