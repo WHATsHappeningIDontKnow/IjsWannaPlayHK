@@ -1,0 +1,44 @@
+name: Contact Us
+description: Get in touch with the team
+title: "Contact: [Subject Here]"
+labels: ["contact"]
+assignees: ["celestrium-games"]
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for reaching out! Please fill out the form below and we'll get back to you as soon as possible."
+  
+  - type: input
+    id: name
+    attributes:
+      label: Your Name
+      description: What should we call you?
+      placeholder: "e.g., John Doe"
+    validations:
+      required: true
+  
+  - type: input
+    id: email
+    attributes:
+      label: Email Address
+      description: How can we contact you back?
+      placeholder: "your.email@example.com"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: message
+    attributes:
+      label: Message
+      description: Tell us what's on your mind
+      placeholder: "Your message here..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any additional details you'd like to share
+      placeholder: "Optional additional info..."
