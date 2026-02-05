@@ -64,6 +64,6 @@ body:
     id: network
     attributes:
       label: What internet/network are you on?
-      description: Please specify whether you are on school wifi or your home wifi, and if applicable, whether your home wifi blocks certain sites
+      description: Specify whether you are on school wifi or your home wifi, and if applicable, whether your home wifi blocks certain sites
     validations:
       required: true
