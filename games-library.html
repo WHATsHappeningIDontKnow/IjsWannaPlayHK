@@ -394,22 +394,6 @@
                 }
             })();
 
-            // --- Search Functionality ---
-            const searchInput = document.getElementById('search');
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase().trim();
-                
-                if (!term) {
-                    render(games);
-                } else {
-                    const filtered = games.filter(g => 
-                        g.name.toLowerCase().includes(term) || 
-                        (g.category && g.category.toLowerCase().includes(term))
-                    );
-                    render(filtered);
-                }
-            });
-
             // Initial Render
             if (typeof games !== 'undefined') {
                 render(games);

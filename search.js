@@ -7,8 +7,12 @@ const debounce = (fn, wait=120) => {
 function createItemElement(item) {
     const link = document.createElement('a');
     link.href = '#';
-    link.className = 'item game-card';
-    // Apply hoverable class if animations are enabled
+    
+    // Determine if this is a game (has category) or utility (no category)
+    const isGame = item.category !== undefined;
+    
+    link.className = isGame ? 'item game-card' : 'item item-card';
+    
     if (localStorage.getItem('celestrium-animations') !== 'false') {
         link.classList.add('hoverable');
     }
@@ -16,15 +20,26 @@ function createItemElement(item) {
     
     const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png?login.live.com` : `${item.url}/favicon.png?login.live.com`;
     
-    link.innerHTML = `
-        <div class="game-icon-wrapper">
-            <img src="${iconPath}" alt="${item.name}" class="game-icon">
+    const iconWrapperClass = isGame ? 'game-icon-wrapper' : 'item-icon-wrapper';
+    const iconClass = isGame ? 'game-icon' : 'item-icon';
+    const infoClass = isGame ? 'game-info' : 'item-info';
+    const titleClass = isGame ? 'game-title' : 'item-title';
+    const categoryClass = isGame ? 'game-category-label' : 'item-category-label';
+    
+    let innerHtml = `
+        <div class="${iconWrapperClass}">
+            <img src="${iconPath}" alt="${item.name}" class="${iconClass}">
         </div>
-        <div class="game-info">
-            <div class="game-title">${item.name}</div>
-            <div class="game-category-label">${item.category || 'other'}</div>
-        </div>
+        <div class="${infoClass}">
+            <div class="${titleClass}">${item.name}</div>
     `;
+    
+    if (item.category) {
+        innerHtml += `<div class="${categoryClass}">${item.category}</div>`;
+    }
+    
+    innerHtml += `</div>`;
+    link.innerHTML = innerHtml;
     return link;
 }
 
@@ -34,57 +49,73 @@ function renderItems(items, searchEl, listEl, noResultsEl) {
     const frag = document.createDocumentFragment();
     let count = 0;
 
-    // Define category order
-    const categoryOrder = [
-        'action', 'adventure', 'emulator', 'platformer', 'strategy', 'racing', 
-        'puzzle', 'sports', 'io', 'roblox', 'other'
-    ];
+    // Check if items have categories (games) or not (utilities)
+    const hasCategories = items.some(item => item.category);
 
-    // Group by category
-    const groups = {};
-    categoryOrder.forEach(c => groups[c] = []);
-    
-    items.forEach(item => {
-        if (item.name.toLowerCase().includes(q)) {
-            let cat = (item.category || 'other').toLowerCase();
-            if (!groups[cat]) cat = 'other';
-            groups[cat].push(item);
-            count++;
-        }
-    });
+    if (hasCategories) {
+        // Games: organize by category
+        const categoryOrder = [
+            'action', 'adventure', 'emulator', 'platformer', 'strategy', 'racing', 
+            'puzzle', 'sports', 'io', 'roblox', 'other'
+        ];
 
-    // Render each category section
-    categoryOrder.forEach(cat => {
-        if (groups[cat].length > 0) {
-            const section = document.createElement('div');
-            section.className = 'category-section';
-            
-            const header = document.createElement('div');
-            header.className = 'category-header';
-            
-            const title = document.createElement('div');
-            title.className = 'category-title';
-            title.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
-            
-            const countEl = document.createElement('div');
-            countEl.className = 'category-count';
-            countEl.textContent = groups[cat].length;
-            
-            header.appendChild(title);
-            header.appendChild(countEl);
-            section.appendChild(header);
-            
-            const grid = document.createElement('div');
-            grid.className = 'games-grid';
-            
-            groups[cat].forEach(item => {
+        const groups = {};
+        categoryOrder.forEach(c => groups[c] = []);
+        
+        items.forEach(item => {
+            if (item.name.toLowerCase().includes(q)) {
+                let cat = (item.category || 'other').toLowerCase();
+                if (!groups[cat]) cat = 'other';
+                groups[cat].push(item);
+                count++;
+            }
+        });
+
+        categoryOrder.forEach(cat => {
+            if (groups[cat].length > 0) {
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                
+                const header = document.createElement('div');
+                header.className = 'category-header';
+                
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                
+                const countEl = document.createElement('div');
+                countEl.className = 'category-count';
+                countEl.textContent = groups[cat].length;
+                
+                header.appendChild(title);
+                header.appendChild(countEl);
+                section.appendChild(header);
+                
+                const grid = document.createElement('div');
+                grid.className = 'games-grid';
+                
+                groups[cat].forEach(item => {
+                    grid.appendChild(createItemElement(item));
+                });
+                
+                section.appendChild(grid);
+                frag.appendChild(section);
+            }
+        });
+    } else {
+        // Utilities: just display in a grid
+        const grid = document.createElement('div');
+        grid.className = 'games-grid';
+        
+        items.forEach(item => {
+            if (item.name.toLowerCase().includes(q)) {
                 grid.appendChild(createItemElement(item));
-            });
-            
-            section.appendChild(grid);
-            frag.appendChild(section);
-        }
-    });
+                count++;
+            }
+        });
+        
+        frag.appendChild(grid);
+    }
 
     listEl.appendChild(frag);
     noResultsEl.classList.toggle('hidden', count !== 0);

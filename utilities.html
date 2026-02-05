@@ -233,6 +233,12 @@
             transition: none !important;
             animation: none !important;
         }
+        /* Search compatibility */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
     </style>
 </head>
 <body>
@@ -400,22 +406,6 @@
             if (window.parent) {
                 window.parent.postMessage({type: 'pageLoaded'}, '*');
             }})();
-
-            // --- Search Functionality ---
-            const searchInput = document.getElementById('search');
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase().trim();
-                
-                if (!term) {
-                    render(utilities);
-                } else {
-                    const filtered = utilities.filter(u => 
-                        u.name.toLowerCase().includes(term) || 
-                        (u.category && u.category.toLowerCase().includes(term))
-                    );
-                    render(filtered);
-                }
-            });
 
             // Initial Render
             if (typeof utilities !== 'undefined') {
