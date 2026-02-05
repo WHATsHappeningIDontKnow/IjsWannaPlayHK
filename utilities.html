@@ -346,15 +346,16 @@
 
                         itemsInCat.forEach(item => {
                             const link = document.createElement('a');
-                            link.href = item.url + "?login.live.com";
-                            link.className = 'item-card';
+                            link.href = '#';
+                            link.className = 'item item-card';
+                            link.dataset.url = item.url + '?login.live.com';
                             
                             // Improve icon path logic
                             const iconPath = item.url.endsWith('/') ? `${item.url}favicon.png?login.live.com` : `${item.url}/favicon.png?login.live.com`;
 
                             link.innerHTML = `
                                 <div class="item-icon-wrapper">
-                                    <img src="${iconPath}" alt="${item.name}" class="item-icon"">
+                                    <img src="${iconPath}" alt="${item.name}" class="item-icon">
                                 </div>
                                 <div class="item-info">
                                     <div class="item-title">${item.name}</div>
@@ -377,6 +378,12 @@
                 }
             }
             
+            // Initialize search with click handlers
+            initializeSearch(utilities, document.getElementById('search'), document.getElementById('items-container'), document.getElementById('no-results'));
+            
+            // Initial render
+            render(utilities);
+
             (function() {
             // --- Theme & System Initialization ---
             const savedTheme = localStorage.getItem('celestrium-theme') || 'dark';

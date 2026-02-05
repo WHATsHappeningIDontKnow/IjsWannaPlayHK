@@ -322,7 +322,6 @@
                         const section = document.createElement('div');
                         section.className = 'category-section';
 
-                        // Header (No Emojis, Clean Look)
                         const header = document.createElement('div');
                         header.className = 'category-header';
                         
@@ -344,15 +343,16 @@
 
                         gamesInCat.forEach(game => {
                             const link = document.createElement('a');
-                            link.href = game.url + "?login.live.com";
-                            link.className = 'game-card';
+                            link.href = '#';
+                            link.className = 'item game-card';
+                            link.dataset.url = game.url + '?login.live.com';
                             
                             // Improve icon path logic
                             const iconPath = game.url.endsWith('/') ? `${game.url}favicon.png?login.live.com` : `${game.url}/favicon.png?login.live.com`;
 
                             link.innerHTML = `
                                 <div class="game-icon-wrapper">
-                                    <img src="${iconPath}" alt="${game.name}" class="game-icon"">
+                                    <img src="${iconPath}" alt="${game.name}" class="game-icon">
                                 </div>
                                 <div class="game-info">
                                     <div class="game-title">${game.name}</div>
@@ -374,6 +374,12 @@
                     noResults.style.display = 'none';
                 }
             }
+
+            // Initialize search with click handlers
+            initializeSearch(games, document.getElementById('search'), document.getElementById('games-container'), document.getElementById('no-results'));
+            
+            // Initial render
+            render(games);
 
             (function() {
                 // --- Theme & System Initialization ---
