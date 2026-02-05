@@ -24,6 +24,5 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Please Complete the Following Information:**
- - What grade are you in?
  - What device are you using?
- - What version of Celestrium are you on (you can find this in settings in the "advanced" section)?
+ - What internet/network are you on?

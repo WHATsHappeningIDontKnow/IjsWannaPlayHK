@@ -1,0 +1,69 @@
+name: Bug Report
+description: Create a report to help us fix a bug
+title: "Bug Report: [State Bug Here in a Few Words]"
+labels: ["bug"]
+assignees: ["celestrium-games"]
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for reporting a bug! Please fill out the form below."
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is
+      placeholder: "Describe the bug here..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How To Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen
+      placeholder: "Expected behavior here..."
+    validations:
+      required: true
+  
+  - type: upload
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, upload screenshots to help explain your problem
+      accept: "image/*"
+  
+  - type: dropdown
+    id: device
+    attributes:
+      label: What device are you using?
+      options:
+        - School Chromebook
+        - Personal Computer or Desktop
+        - Tablet
+        - Mobile
+        - Other
+    validations:
+      required: true
+  
+  - type: input
+    id: network
+    attributes:
+      label: What internet/network are you on?
+      description: Please specify whether you are on school wifi or your home wifi, and if applicable, whether your home wifi blocks certain sites
+    validations:
+      required: true
