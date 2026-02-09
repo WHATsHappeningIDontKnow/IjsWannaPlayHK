@@ -71,6 +71,7 @@ const games = [
     {name:"PolyTrack", url:"./games/polytrack/", category:"racing"},
     {name:"Rainbow Obby", url:"./games/rainbow-obby/", category:"roblox"},
     {name:"Retro Bowl", url:"./games/retrobowl/", category:"sports"},
+    {name:"Retro Bowl College", url:"./games/retrobowl-college/", category:"sports"},
     {name:"RocketGoal.io", url:"./games/rocketgoalio/", category:"io"},
     {name:"Rooftop Snipers", url:"./games/rooftop-snipers/", category:"action"},
     {name:"Run 3", url:"./games/run3/", category:"platformer"},
