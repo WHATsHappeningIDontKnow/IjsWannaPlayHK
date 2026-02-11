@@ -14,6 +14,7 @@ const games = [
     {name:"Bad Ice Cream 3", url:"./games/bad-ice-cream-3/", category:"platformer"},
     {name:"Bad Time Simulator", url:"./games/bad-time-simulator/", category:"action"},
     {name:"Baldi's Basics", url:"./games/baldis-basics/", category:"other"},
+    {name:"Basket Random", url:"./games/basket-random/", category:"sports"},
     {name:"Basketball Stars", url:"./games/basketball-stars/", category:"sports"},
     {name:"Big Ice Tower Tiny Square", url:"./games/big-ice-tower-tiny-square/", category:"platformer"},
     {name:"Big Neon Tower Tiny Square", url:"./games/big-neon-tower-tiny-square/", category:"platformer"},
