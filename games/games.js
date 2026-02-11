@@ -43,6 +43,8 @@ const games = [
     {name:"Five Nights at Freddy's 4", url:"./games/five-nights-at-freddys-4/", category:"action"},
     {name:"Fly the Farthest", url:"./games/fly-the-farthest/", category:"roblox"},
     {name:"Fruit Ninja", url:"./games/fruit-ninja/", category:"action"},
+    {name:"Geometry Dash (Scratch)", url:"./games/geometry-dash/", category:"action"},
+    {name:"Geometry Dash Subzero (Scratch)", url:"./games/geometry-dash-subzero/", category:"action"},
     {name:"Gun Mayhem", url:"./games/gun-mayhem/", category:"action"},
     {name:"Hei$t", url:"./games/heist/", category:"adventure"},
     {name:"Henry Stickmin: Escaping the Prison", url:"./games/henry-stickmin-escaping-the-prison/", category:"adventure"},
