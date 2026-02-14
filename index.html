@@ -418,18 +418,26 @@
         </script>
         <script>
             const allowedBase = "https://celestrium-online-portal.vercel.app/";
-            const url = window.location.href;
-            const isIframed = window.top !== window.self;
+            let url = window.location.href;
+            let topUrl = "";
+
+            try {
+            topUrl = window.top.location.href;
+            } catch (e) {
+            topUrl = "";
+            }
 
             const isAllowed = 
-            url.includes(allowedBase) ||
-            url.includes("http://localhost:8000") ||
-            url.includes("http://localhost:800") ||
-            url === "about:blank" ||
-            url.endsWith("app.github.dev");
+            url === "https://celestrium-online-portal.vercel.app" ||
+            url === "https://celestrium-online-portal.vercel.app/?login.live.com" ||
+            url.includes("localhost:8000") ||
+            url.includes("localhost:800") ||
+            topUrl === "about:blank" ||
+            topUrl.includes("app.github.dev") ||
+            url.includes("app.github.dev");
 
-            if (isIframed && !isAllowed) {
-            document.body.innerHTML = "<iframe width='100%' height='100%' src='" + allowedBase + "/blocked.html?login.live.com'></iframe>";
+            if (!isAllowed) {
+            document.body.innerHTML = "<iframe width='100%' height='100%' src='" + allowedBase + "blocked.html?login.live.com' style='border:none;'></iframe>";
             }
         </script>
     </body>
