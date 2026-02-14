@@ -178,13 +178,14 @@
     .btn-ghost {
       background: transparent;
       color: var(--text);
-      border: 1px solid var(--border);
+      border: 2.5px solid color-mix(in srgb, var(--accent) 40%, var(--border));
       flex: 1 1 140px;
       justify-content: center;
     }
     .btn-ghost:hover {
       background: color-mix(in srgb, var(--accent) 10%, transparent);
-      border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+      border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
     }
 
     .meta {
@@ -227,6 +228,48 @@
       .actions { flex-direction: column; }
       button { width: 100%; }
     }
+    .btn-shimmer {
+      position: relative;
+      padding: 10px 20px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      font-weight: 700;
+      flex: 0 0 60%;
+      justify-content: center;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      height: 44px;
+      margin: 0 auto;
+    }
+    .btn-shimmer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 10px;
+      padding: 2.5px;
+      background: conic-gradient(from 0deg, #ff0080, #ff8c00, #40e0d0, #ff0080);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: rotateBorder 4s linear infinite;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .btn-shimmer:hover {
+      box-shadow: 0 0 15px rgba(64, 224, 208, 0.3);
+    }
+    @keyframes rotateBorder {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -262,8 +305,9 @@
     </section>
 
     <div class="actions">
-      <button id="submit" class="btn-primary" type="button" onclick="openAboutBlank()">Open in about:blank</button>
+      <button id="submit" class="btn-primary" type="button" onclick="openAboutBlank()">Open in About:Blank</button>
       <button class="btn-ghost" type="button" onclick="clearInput()">Clear</button>
+      <button class="btn-shimmer" type="button" onclick="openThisSiteInBlank()">Open This Site</button>
     </div>
 
     <div class="meta">
@@ -353,6 +397,19 @@
     });
 
     input.addEventListener("input", () => setStatus("Ready"));
+
+    function openThisSiteInBlank() {
+      const blankWindow = window.open("about:blank", "_blank");
+      if (blankWindow) {
+        const iframeHTML = `
+          <iframe style="width:100%;height:100%;border:none;margin:0;padding:0;" src="${window.top.location}"></iframe>
+        `;
+        blankWindow.document.write(iframeHTML);
+        blankWindow.document.close();
+      } else {
+        setStatus("Failed to open window - check pop-up blocker");
+      }
+    }
   </script>
 </body>
 </html>
