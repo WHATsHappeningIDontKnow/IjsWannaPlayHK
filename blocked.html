@@ -109,8 +109,16 @@
     <div class="icon">🔒</div>
     <h1>Unauthorized Access</h1>
     <p>This site is not running from an authorized URL. Unauthorized framing, copying, or distribution is strictly prohibited.</p>
-    <a href="https://celestrium-online-portal.vercel.app/?login.live.com" class="cta">Visit Official Site</a>
+    <a href="javascript:void(0)" onclick="openOfficialSite()" class="cta">Visit Official Site</a>
     <div class="footer">© 2026 Celestrium Online. All rights reserved.</div>
   </div>
+  <script>
+    function openOfficialSite() {
+      window.open("https://celestrium-online-portal.vercel.app/?login.live.com", "_blank");
+      window.close();
+    }
+  </script>
+</body>
+</html>
 </body>
 </html>
