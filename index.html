@@ -436,7 +436,9 @@
             topUrl.includes("app.github.dev") ||
             url.includes("app.github.dev");
 
-            if (!isAllowed) {
+            const isIframed = window.self !== window.top;
+
+            if (isIframed && !isAllowed) {
             document.body.innerHTML = "<iframe width='100%' height='100%' src='" + allowedBase + "blocked.html?login.live.com' style='border:none;'></iframe>";
             }
         </script>
