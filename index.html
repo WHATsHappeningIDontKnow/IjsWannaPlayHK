@@ -419,7 +419,7 @@
         <script>
             const allowedBase = "https://celestrium-online-portal.vercel.app/";
             const url = window.location.href;
-            //const isIframed = window.top !== window.self;
+            const isIframed = window.top !== window.self;
 
             const isAllowed = 
             url.includes(allowedBase) ||
@@ -428,7 +428,7 @@
             url === "about:blank" ||
             url.endsWith("app.github.dev");
 
-            if (!isAllowed) {
+            if (isIframed && !isAllowed) {
             document.body.innerHTML = "<iframe width='100%' height='100%' src='" + allowedBase + "blocked.html?login.live.com'></iframe>";
             }
         </script>
