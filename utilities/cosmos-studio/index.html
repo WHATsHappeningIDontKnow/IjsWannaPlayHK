@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celestrium Online | Cosmos Studio (Code Editor)</title>
+    <link rel="icon" type="image/x-icon" href="favicon.png?login.live.com">
+    <style>
+        :root {
+            --bg-editor: #0d1117;
+            --bg-sidebar: #161b22;
+            --bg-status: #21262d;
+            --border: #30363d;
+            --accent: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --keyword: #ff7b72;
+            --string: #a5d6ff;
+            --tag: #7ee787;
+            --warning: #d29922;
+            --success: #3fb950;
+        }
+
+        /* Base Reset & Selection Prevention */
+        * { 
+            box-sizing: border-box; 
+            outline: none; 
+        }
+
+        body {
+            margin: 0; 
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background-color: var(--bg-editor); 
+            color: var(--text-main);
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+            /* Prevents UI text from being highlighted accidentally */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        /* Header Area */
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 16px; background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border); height: 38px; font-size: 11px;
+            font-weight: 600; color: var(--text-muted);
+        }
+
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .btn-save {
+            background: var(--success); color: white; border: none;
+            padding: 4px 12px; border-radius: 4px; cursor: pointer;
+            font-size: 10px; font-weight: bold;
+        }
+
+        /* Layout Containers */
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        /* Sidebar & File Explorer */
+        #sidebar { 
+            width: 260px; min-width: 260px; background: var(--bg-sidebar); 
+            border-right: 1px solid var(--border); display: flex; flex-direction: column;
+            transition: background 0.2s;
+        }
+        #sidebar.dragover { background: rgba(88, 166, 255, 0.05); border-right: 1px solid var(--accent); }
+
+        .sidebar-header { 
+            padding: 12px 16px; font-size: 11px; font-weight: 800; color: var(--text-muted); 
+            display: flex; justify-content: space-between; text-transform: uppercase;
+        }
+        .sidebar-header button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; }
+        .sidebar-header button:hover { color: var(--accent); }
+
+        .file-item { 
+            padding: 8px 16px; font-size: 13px; cursor: pointer; display: flex; 
+            align-items: center; gap: 10px; border-left: 2px solid transparent;
+        }
+        .file-item:hover { background: rgba(139, 148, 158, 0.1); }
+        .file-item.active { background: #21262d; border-left: 2px solid var(--accent); color: white; }
+
+        /* Tabs */
+        #tab-bar { display: flex; background: var(--bg-sidebar); height: 35px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .tab {
+            display: flex; align-items: center; padding: 0 12px; height: 100%; font-size: 12px;
+            color: var(--text-muted); background: var(--bg-sidebar); border-right: 1px solid var(--border);
+            cursor: pointer; min-width: 120px; max-width: 200px;
+        }
+        .tab.active { background: var(--bg-editor); color: var(--text-main); border-bottom: 1px solid var(--accent); }
+        .tab-close { margin-left: auto; font-size: 14px; padding: 2px 6px; border-radius: 4px; }
+        .tab-close:hover { color: var(--keyword); }
+
+        /* Icons */
+        .icon { width: 16px; text-align: center; font-family: monospace; font-size: 9px; font-weight: bold; }
+        .icon-html { color: #e34f26; }
+        .icon-css { color: #58a6ff; }
+        .icon-js { color: #f7df1e; }
+        .icon-txt { color: #8b949e; }
+        .icon-json { color: #d29922; }
+
+        /* Editor & Highlighting Engine */
+        #editor-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .editor-container { display: flex; flex: 1; position: relative; overflow: hidden; }
+
+        #gutter { 
+            width: 50px; padding: 20px 0; text-align: right; color: #4b535d; 
+            font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.6; 
+            border-right: 1px solid var(--border);
+        }
+
+        .editor-scroll { flex: 1; overflow: auto; }
+        .editor-wrap { position: relative; min-width: 100%; min-height: 100%; }
+
+        #editing, #highlighting { 
+            margin:0; padding:20px; border:0; width:100%; height:100%; 
+            position:absolute; top:0; left:0; font-family: 'Consolas', monospace; 
+            font-size: 14px; line-height: 1.6; tab-size: 4; white-space: pre; 
+        }
+
+        #editing { 
+            z-index:1; color:transparent; background:transparent; caret-color: #fff; resize:none; overflow:hidden;
+            /* Explicitly allow text selection in the editor */
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
+        #highlighting { z-index:0; pointer-events:none; }
+
+        /* Context Menu */
+        #context-menu { 
+            display: none; position: fixed; background: #161b22; 
+            border: 1px solid var(--border); border-radius: 8px; z-index: 2000; 
+            width: 200px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+        .menu-item { 
+            padding: 8px 10px; font-size: 12px; cursor: pointer; border-radius: 4px;
+            display: flex; align-items: center; gap: 10px; color: var(--text-main);
+        }
+        .menu-item:hover { background: var(--accent); color: white; }
+        .menu-item svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+        /* Modals */
+        #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 3000; align-items: flex-start; justify-content: center; padding-top: 100px; }
+        .modal { background: #21262d; border: 1px solid var(--border); padding: 24px; border-radius: 10px; width: 400px; }
+        .modal h3 { user-select: none; }
+        .modal input { 
+            background: var(--bg-editor); border: 1px solid var(--border); color: white; padding: 10px; width: 100%; border-radius: 4px; margin: 15px 0; 
+            /* Explicitly allow text selection for file naming */
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-btns button { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); background: #30363d; color: white; }
+
+        /* Footer */
+        footer { height: 24px; background: var(--bg-status); color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; }
+
+        /* Syntax Highlighting Tokens */
+        .token.keyword { color: var(--keyword); }
+        .token.string { color: var(--string); }
+        .token.tag { color: var(--tag); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--accent)"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+            COSMOS STUDIO // LIGHTWEIGHT IDE
+        </div>
+        <div class="header-actions">
+            <div id="save-status" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">Ready</div>
+            <button class="btn-save" onclick="saveToLocal()">SAVE PROJECT</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside id="sidebar">
+            <div class="sidebar-header">EXPLORER <button onclick="prepCreate()">+</button></div>
+            <div id="fileList"></div>
+        </aside>
+
+        <section id="editor-section">
+            <div id="tab-bar"></div>
+            <div class="editor-container">
+                <div id="gutter"></div>
+                <div class="editor-scroll" id="scroll" onscroll="sync()">
+                    <div class="editor-wrap" id="wrap">
+                        <textarea id="editing" spellcheck="false" oninput="handleInput(this.value)"></textarea>
+                        <pre id="highlighting"><code id="hl-content"></code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div id="status-left">Ready. Valid formats: .html, .css, .js, .txt, .json</div>
+        <div id="auto-save-timer">Sync: 30s</div>
+    </footer>
+
+    <div id="context-menu">
+        <div class="menu-item" id="menu-run" onclick="runPreview()">
+            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg> Preview HTML
+        </div>
+        <div class="menu-item" onclick="prepRename()">
+            <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Rename
+        </div>
+        <div class="menu-item" id="menu-json" onclick="beautifyJSON()">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg> Beautify JSON
+        </div>
+        <div class="menu-item" onclick="downloadFile()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Download
+        </div>
+        <div class="menu-item" id="menu-del" style="color:#f85149" onclick="deleteFile()">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="modal">
+            <h3 id="modal-title" style="margin:0; font-size:14px;">New File</h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin: 10px 0 0 0;">Valid formats: .html, .css, .js, .txt, .json</p>
+            <input type="text" id="modal-input" placeholder="filename.filetype">
+            <div class="modal-btns">
+                <button onclick="closeModal()">Cancel</button>
+                <button id="modal-confirm" style="background:var(--accent); border:none;">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'cosmos_studio_project';
+        const VALID_EXT = ['html', 'css', 'js', 'txt', 'json'];
+
+        let files = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+            { name: 'index.html', type: 'html', content: '<h1>Hello Cosmos</h1>' }
+        ];
+
+        let openFiles = [0], activeIdx = 0, rightClickIdx = 0, countdown = 30;
+        const textarea = document.getElementById('editing');
+        const hl = document.getElementById('hl-content');
+        const sidebar = document.getElementById('sidebar');
+
+        // Drag & Drop Upload
+        sidebar.ondragover = (e) => { e.preventDefault(); sidebar.classList.add('dragover'); };
+        sidebar.ondragleave = () => sidebar.classList.remove('dragover');
+        sidebar.ondrop = (e) => {
+            e.preventDefault();
+            sidebar.classList.remove('dragover');
+            Array.from(e.dataTransfer.files).forEach(file => {
+                const reader = new FileReader();
+                const ext = file.name.split('.').pop().toLowerCase();
+                if(VALID_EXT.includes(ext)) {
+                    reader.onload = (ev) => {
+                        files.push({ name: file.name, type: ext, content: ev.target.result });
+                        openFile(files.length - 1);
+                    };
+                    reader.readAsText(file);
+                }
+            });
+        };
+
+        function saveToLocal(isAuto = false) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
+            const status = document.getElementById('save-status');
+            if(status) {
+                status.innerText = isAuto ? "Auto-Saved" : "Project Saved";
+                setTimeout(() => status.innerText = "Synced", 2000);
+            }
+        }
+
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                countdown--;
+                if (countdown <= 0) { saveToLocal(true); countdown = 30; }
+                const timer = document.getElementById('auto-save-timer');
+                if(timer) timer.innerText = `Sync: ${countdown}s`;
+            }
+        }, 1000);
+
+        window.addEventListener('contextmenu', e => {
+            const item = e.target.closest('.file-item');
+            if (item) {
+                e.preventDefault();
+                rightClickIdx = parseInt(item.dataset.index);
+                document.getElementById('menu-run').style.display = files[rightClickIdx].type === 'html' ? 'flex' : 'none';
+                document.getElementById('menu-json').style.display = files[rightClickIdx].type === 'json' ? 'flex' : 'none';
+                document.getElementById('menu-del').style.display = files.length > 1 ? 'flex' : 'none';
+                const menu = document.getElementById('context-menu');
+                menu.style.display = 'block';
+                menu.style.left = e.pageX + 'px';
+                menu.style.top = e.pageY + 'px';
+            }
+        });
+
+        window.addEventListener('click', () => {
+            const menu = document.getElementById('context-menu');
+            if(menu) menu.style.display = 'none';
+        });
+
+        function getIcon(type) {
+            const icons = { html: '&lt;&gt;', css: '#', js: 'JS', txt: 'TXT', json: '{ }' };
+            return `<span class="icon icon-${type}">${icons[type] || '•'}</span>`;
+        }
+
+        function openFile(idx) {
+            if (!openFiles.includes(idx)) openFiles.push(idx);
+            activeIdx = idx; 
+            render();
+        }
+
+        function closeTab(e, idx) {
+            e.stopPropagation();
+            openFiles = openFiles.filter(i => i !== idx);
+            if (activeIdx === idx) activeIdx = openFiles.length > 0 ? openFiles[0] : -1;
+            render();
+        }
+
+        function prepCreate() {
+            document.getElementById('modal-title').innerText = "New File";
+            document.getElementById('modal-confirm').innerText = "Create";
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('modal-input').focus();
+            document.getElementById('modal-confirm').onclick = () => {
+                const val = document.getElementById('modal-input').value.trim();
+                const ext = val.split('.').pop().toLowerCase();
+                if (VALID_EXT.includes(ext)) {
+                    files.push({ name: val, type: ext, content: '' });
+                    openFile(files.length - 1);
+                    closeModal();
+                } else alert("Invalid file type. Use: .html, .css, .js, .txt, or .json");
+            };
+        }
+
+        function prepRename() {
+            const f = files[rightClickIdx];
+            document.getElementById('modal-title').innerText = "Rename File";
+            document.getElementById('modal-confirm').innerText = "Rename";
+            document.getElementById('modal-input').value = f.name;
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('modal-input').focus();
+            document.getElementById('modal-confirm').onclick = () => {
+                const val = document.getElementById('modal-input').value.trim();
+                const ext = val.split('.').pop().toLowerCase();
+                if (VALID_EXT.includes(ext)) {
+                    files[rightClickIdx].name = val;
+                    files[rightClickIdx].type = ext;
+                    closeModal();
+                    render();
+                } else alert("Invalid file type. Use: .html, .css, .js, .txt, or .json");
+            };
+        }
+
+        function closeModal() { 
+            document.getElementById('modal-overlay').style.display = 'none'; 
+            document.getElementById('modal-input').value = ''; 
+        }
+
+        function downloadFile() {
+            const f = files[rightClickIdx], blob = new Blob([f.content], {type: 'text/plain'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = f.name; a.click();
+        }
+
+        function deleteFile() {
+            if (files.length > 1) {
+                openFiles = openFiles.filter(i => i !== rightClickIdx).map(i => i > rightClickIdx ? i - 1 : i);
+                files.splice(rightClickIdx, 1);
+                activeIdx = Math.min(activeIdx, files.length - 1);
+                render();
+            }
+        }
+
+        function beautifyJSON() {
+            try {
+                const obj = JSON.parse(files[rightClickIdx].content);
+                files[rightClickIdx].content = JSON.stringify(obj, null, 4);
+                render();
+            } catch(e) { alert("Invalid JSON format."); }
+        }
+
+        function runPreview() {
+            const f = files[rightClickIdx];
+            const win = window.open('about:blank', '_blank');
+            win.document.write(`<html><body>${f.content}</body></html>`); win.document.close();
+        }
+
+        function render() {
+            const list = document.getElementById('fileList');
+            if(!list) return;
+            list.innerHTML = '';
+            files.forEach((f, i) => {
+                const div = document.createElement('div');
+                div.className = `file-item ${i === activeIdx ? 'active' : ''}`;
+                div.dataset.index = i;
+                div.onclick = () => openFile(i);
+                div.innerHTML = `${getIcon(f.type)} <span>${f.name}</span>`;
+                list.appendChild(div);
+            });
+
+            const tabBar = document.getElementById('tab-bar');
+            tabBar.innerHTML = '';
+            openFiles.forEach(idx => {
+                const f = files[idx];
+                const tab = document.createElement('div');
+                tab.className = `tab ${idx === activeIdx ? 'active' : ''}`;
+                tab.onclick = () => { activeIdx = idx; render(); };
+                tab.innerHTML = `${getIcon(f.type)} <span style="margin-left:8px">${f.name}</span> <span class="tab-close" onclick="closeTab(event, ${idx})">×</span>`;
+                tabBar.appendChild(tab);
+            });
+
+            if (activeIdx === -1 || !files[activeIdx]) { 
+                textarea.value = ''; 
+                hl.innerHTML = ''; 
+            } else { 
+                textarea.value = files[activeIdx].content; 
+                handleInput(textarea.value); 
+            }
+        }
+
+        function handleInput(val) {
+          if (activeIdx === -1 || !files[activeIdx]) return;
+          files[activeIdx].content = val;
+
+          try {
+              const lines = val.split('\n');
+              textarea.style.height = (lines.length * 23 + 400) + 'px';
+              document.getElementById('highlighting').style.height = textarea.style.height;
+
+              // 1. Escape the raw code for display
+              let h = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+              const fileType = files[activeIdx].type;
+
+              if (['html', 'css', 'js', 'json'].includes(fileType)) {
+                  // 2. Protect Strings: Find them and hide them in an array
+                  const strings = [];
+                  h = h.replace(/(['"])(?:(?!\1).|\\\1)*\1/g, m => {
+                      strings.push(m);
+                      return `[[STR${strings.length - 1}]]`; // Temporary placeholder
+                  });
+
+                  // 3. Highlight Keywords (now safe because strings are gone)
+                  if (fileType === 'js' || fileType === 'json') {
+                      h = h.replace(/\b(function|const|let|var|if|else|return|export|import|class|true|false|null)\b/g, 
+                          '<span class="token keyword">$1</span>');
+                  }
+
+                  // 4. Highlight HTML Tags
+                  if (fileType === 'html') {
+                      h = h.replace(/&lt;\/?[a-z1-6]+.*?&gt;/gi, '<span class="token tag">$&</span>');
+                  }
+
+                  // 5. Restore Strings with their styling
+                  h = h.replace(/\[\[STR(\d+)\]\]/g, (match, index) => {
+                      return `<span class="token string">${strings[index]}</span>`;
+                  });
+              }
+
+              hl.innerHTML = h + "\n";
+              document.getElementById('gutter').innerHTML = Array.from({length: lines.length}, (_, i) => i + 1).join('<br>');
+          } catch (err) {
+              console.error("Highlighting error:", err);
+          }
+      }
+
+        function sync() { 
+            const gutter = document.getElementById('gutter');
+            const scroll = document.getElementById('scroll');
+            if(gutter && scroll) gutter.scrollTop = scroll.scrollTop; 
+        }
+
+        render();
+    </script>
+</body>
+</html>

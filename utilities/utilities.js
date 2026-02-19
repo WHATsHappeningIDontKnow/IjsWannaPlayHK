@@ -1,5 +1,6 @@
 const utilities = [
     {name:"About:Blank Tab Cloaker", url:"./utilities/about-blank-cloaker/"},
+    {name:"Cosmos Studio (Code Editor)", url:"./utilities/cosmos-studio/"},
     //{name:"Grade Compass", url:"./utilities/gradecompass/"},
     {name:"Ruffle SWF Player", url:"./utilities/ruffle/"},
     {name:"Silk (Spiral Art)", url:"./utilities/silk/"},
