@@ -54,9 +54,32 @@
 
         .header-actions { display: flex; gap: 12px; align-items: center; }
         .btn-save {
-            background: var(--success); color: white; border: none;
-            padding: 4px 12px; border-radius: 4px; cursor: pointer;
-            font-size: 10px; font-weight: bold;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-save:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-muted);
+            color: white;
+        }
+
+        .btn-save:active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            transform: translateY(1px);
         }
 
         .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
@@ -266,7 +289,41 @@
         const VALID_EXT = ['html', 'css', 'js', 'txt', 'json'];
 
         let files = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
-            { name: 'index.html', type: 'html', content: '<html>\n<style>\n  /* Test comment */\n  h1 { color: #58a6ff; }\n</style>\n<body>\n  <h1>Hello Cosmos</h1>\n</body>\n</html>' }
+            {
+                name: 'README.txt',
+                type: 'txt',
+                content: `WELCOME TO COSMOS STUDIO
+        ====================================
+        Your lightweight, browser-based coding environment.
+
+        1. GETTING STARTED
+        - Use the [+] button in the sidebar to create new files.
+        - Drag & Drop files from your computer directly into the sidebar to import them.
+        - Your work is automatically synced to your browser's LocalStorage every 30 seconds.
+
+        2. SUPPORTED FILETYPES
+        - .html  (Full syntax highlighting + Preview mode)
+        - .css   (Full syntax highlighting)
+        - .js    (Full syntax highlighting)
+        - .json  (Syntax highlighting + Beautifier)
+        - .txt   (Plain text editing)
+
+        3. AVAILABLE FUNCTIONS (Right-click a file in the sidebar)
+        - PREVIEW HTML: Opens your HTML code in a new window to see it live.
+        - BEAUTIFY JSON: Instantly formats messy JSON strings into readable code.
+        - RENAME: Safely change filenames (prevents duplicates and invalid types).
+        - DUPLICATE: Creates a copy of your file instantly.
+        - DOWNLOAD: Saves the file to your physical hard drive.
+        - DELETE: Removes the file from your workspace.
+
+        4. PRO TIPS
+        - Line Numbers: The gutter automatically adjusts for wrapped text.
+        - Tabs: You can open multiple files; use the tab bar to switch between them.
+        - Persistence: Even if you refresh the page, your files will stay here!
+
+        Happy Coding!
+        -- The Cosmos Team`
+            }
         ];
 
         let openFiles = [0], activeIdx = 0, rightClickIdx = 0, countdown = 30;
