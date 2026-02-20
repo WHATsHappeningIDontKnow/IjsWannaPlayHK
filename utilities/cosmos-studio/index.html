@@ -92,10 +92,31 @@
         #sidebar.dragover { background: rgba(88, 166, 255, 0.05); border-right: 1px solid var(--accent); }
 
         .sidebar-header { 
-            padding: 12px 16px; font-size: 11px; font-weight: 800; color: var(--text-muted); 
-            display: flex; justify-content: space-between; text-transform: uppercase;
+            padding: 0 16px; /* Removed vertical padding to let height control it */
+            height: 35px;    /* Matches the tab-bar height for symmetry */
+            font-size: 11px; 
+            font-weight: 800; 
+            color: var(--text-muted); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; /* This is the magic line */
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border); /* Optional: adds definition */
         }
-        .sidebar-header button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px; }
+
+        .sidebar-header button { 
+            background: none; 
+            border: none; 
+            color: var(--text-muted); 
+            cursor: pointer; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
         .sidebar-header button:hover { color: var(--accent); }
 
         .file-item { 
