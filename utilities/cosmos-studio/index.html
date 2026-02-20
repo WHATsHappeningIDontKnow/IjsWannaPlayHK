@@ -342,7 +342,7 @@ Your lightweight, browser-based coding environment.
     - Tabs: You can open multiple files; use the tab bar to switch between them.
     - Persistence: Even if you refresh the page, your files will stay here!
         
-If you notice any bugs (especially with syntax hilighting) or have suggestions for new features, please report them to the issues page on the Celestrium Online Github Repository (see the about section of Celestrium Online for the link).
+If you notice any bugs (especially with syntax highlighting) or have suggestions for new features, please report them to the issues page on the Celestrium Online Github Repository (see the about section of Celestrium Online for the link).
 
 Happy Coding!
 -- The Celestrium Online Team`
@@ -416,8 +416,12 @@ Happy Coding!
         }
 
         window.addEventListener('contextmenu', e => {
+            e.preventDefault(); // Globally blocks the browser menu
+            
             const item = e.target.closest('.file-item');
-            if (item) triggerContextMenu(e, parseInt(item.dataset.index));
+            if (item) {
+                triggerContextMenu(e, parseInt(item.dataset.index));
+            }
         });
 
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
