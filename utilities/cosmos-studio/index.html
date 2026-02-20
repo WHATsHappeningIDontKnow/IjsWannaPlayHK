@@ -24,6 +24,7 @@
             
             --warning: #d29922;
             --success: #3fb950;
+            --error: #f85149;
         }
 
         * { box-sizing: border-box; outline: none; }
@@ -92,16 +93,16 @@
         #sidebar.dragover { background: rgba(88, 166, 255, 0.05); border-right: 1px solid var(--accent); }
 
         .sidebar-header { 
-            padding: 0 16px; /* Removed vertical padding to let height control it */
-            height: 35px;    /* Matches the tab-bar height for symmetry */
+            padding: 0 16px;
+            height: 35px;
             font-size: 11px; 
             font-weight: 800; 
             color: var(--text-muted); 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; /* This is the magic line */
+            align-items: center;
             text-transform: uppercase;
-            border-bottom: 1px solid var(--border); /* Optional: adds definition */
+            border-bottom: 1px solid var(--border);
         }
 
         .sidebar-header button { 
@@ -231,6 +232,17 @@
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
         .modal-btns button { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); background: #30363d; color: white; }
 
+        /* Toast Notifications Styles */
+        #toast-container { position: fixed; bottom: 40px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { 
+            background: #21262d; color: #c9d1d9; border: 1px solid var(--border); 
+            padding: 12px 20px; border-radius: 6px; font-size: 13px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); border-left: 4px solid var(--accent); 
+            animation: slideIn 0.3s ease forwards; min-width: 200px;
+        }
+        .toast.error { border-left-color: var(--error); }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
         footer { height: 24px; background: var(--bg-status); color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; }
     </style>
 </head>
@@ -305,6 +317,8 @@
         </div>
     </div>
 
+    <div id="toast-container"></div>
+
     <script>
         const STORAGE_KEY = 'cosmos_studio_project';
         const VALID_EXT = ['html', 'css', 'js', 'txt', 'json'];
@@ -354,16 +368,29 @@ Happy Coding!
         const hl = document.getElementById('hl-content');
         const sidebar = document.getElementById('sidebar');
 
-        // HELPER: Strict duplication and format check
+        // CUSTOM TOAST FUNCTION
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
         function validateFileName(name, excludeIdx = -1) {
             const ext = name.split('.').pop().toLowerCase();
             if (!VALID_EXT.includes(ext)) {
-                alert(`Invalid file type: .${ext}\nOnly ${VALID_EXT.join(', ')} are allowed.`);
+                showToast(`Invalid file type: .${ext}`, 'error');
                 return false;
             }
             const isDuplicate = files.some((f, i) => f.name.toLowerCase() === name.toLowerCase() && i !== excludeIdx);
             if (isDuplicate) {
-                alert(`A file named "${name}" already exists in the workspace.`);
+                showToast(`File "${name}" already exists.`, 'error');
                 return false;
             }
             return true;
@@ -376,7 +403,6 @@ Happy Coding!
             sidebar.classList.remove('dragover');
             Array.from(e.dataTransfer.files).forEach(file => {
                 if(!validateFileName(file.name)) return;
-
                 const reader = new FileReader();
                 const ext = file.name.split('.').pop().toLowerCase();
                 reader.onload = (ev) => {
@@ -416,12 +442,9 @@ Happy Coding!
         }
 
         window.addEventListener('contextmenu', e => {
-            e.preventDefault(); // Globally blocks the browser menu
-            
+            e.preventDefault();
             const item = e.target.closest('.file-item');
-            if (item) {
-                triggerContextMenu(e, parseInt(item.dataset.index));
-            }
+            if (item) triggerContextMenu(e, parseInt(item.dataset.index));
         });
 
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
@@ -445,15 +468,14 @@ Happy Coding!
 
         function prepCreate() {
             const input = document.getElementById('modal-input');
-            input.value = ""; // FIXED: Clears input so filler text is visible
+            input.value = "";
             document.getElementById('modal-title').innerText = "New File";
             document.getElementById('modal-confirm').innerText = "Create";
             document.getElementById('modal-overlay').style.display = 'flex';
             input.focus();
             document.getElementById('modal-confirm').onclick = () => {
                 const val = input.value.trim();
-                if (!validateFileName(val)) return; // FIXED: Added strict duplication/format check
-                
+                if (!validateFileName(val)) return;
                 const ext = val.split('.').pop().toLowerCase();
                 files.push({ name: val, type: ext, content: '' });
                 openFile(files.length - 1); closeModal(); saveToLocal();
@@ -470,8 +492,7 @@ Happy Coding!
             input.focus();
             document.getElementById('modal-confirm').onclick = () => {
                 const val = input.value.trim();
-                if (!validateFileName(val, rightClickIdx)) return; // FIXED: Added strict duplication/format check
-                
+                if (!validateFileName(val, rightClickIdx)) return;
                 const ext = val.split('.').pop().toLowerCase();
                 files[rightClickIdx].name = val; files[rightClickIdx].type = ext;
                 render(); closeModal(); saveToLocal();
@@ -482,7 +503,6 @@ Happy Coding!
             const original = files[rightClickIdx];
             let newName = "copy_" + original.name;
             let counter = 1;
-            // Loop until we find a name that isn't a duplicate
             while(files.some(f => f.name.toLowerCase() === newName.toLowerCase())) {
                 newName = `copy${counter}_` + original.name;
                 counter++;
@@ -513,7 +533,8 @@ Happy Coding!
                 const obj = JSON.parse(files[activeIdx].content);
                 files[activeIdx].content = JSON.stringify(obj, null, 4);
                 render();
-            } catch(e) { alert("Invalid JSON"); }
+                showToast("JSON Formatted");
+            } catch(e) { showToast("Invalid JSON Format", 'error'); }
         }
 
         function runPreview() {
@@ -533,7 +554,6 @@ Happy Coding!
                 div.innerHTML = `${getIcon(f.type)} <span>${f.name}</span> <span class="file-item-dots" onclick="triggerContextMenu(event, ${i})">⋮</span>`;
                 list.appendChild(div);
             });
-
             const tabBar = document.getElementById('tab-bar');
             tabBar.innerHTML = '';
             openFiles.forEach(idx => {
@@ -544,14 +564,11 @@ Happy Coding!
                 tab.innerHTML = `${getIcon(f.type)} <span style="margin-left:8px">${f.name}</span> <span class="tab-close" onclick="closeTab(event, ${idx})">×</span>`;
                 tabBar.appendChild(tab);
             });
-
             if (activeIdx !== -1 && files[activeIdx]) { 
                 textarea.value = files[activeIdx].content; 
                 handleInput(textarea.value); 
             }
         }
-
-        /* --- HIGHLIGHTING ENGINE --- */
 
         function highlightJS(code) {
             return code
@@ -576,15 +593,12 @@ Happy Coding!
         function handleInput(val) {
             if (activeIdx === -1) return;
             files[activeIdx].content = val;
-
             let h = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const type = files[activeIdx].type;
             const protections = [];
-
             h = h.replace(/\/\*[\s\S]*?\*\//g, m => { protections.push(`<span class="hl-comm">${m}</span>`); return `[[PROT${protections.length - 1}]]`; });
             h = h.replace(/(?<![:"'])\/\/.*/g, m => { protections.push(`<span class="hl-comm">${m}</span>`); return `[[PROT${protections.length - 1}]]`; });
             h = h.replace(/(['"|`])(?:(?!\1).|\\\1)*\1/g, m => { protections.push(`<span class="hl-str">${m}</span>`); return `[[PROT${protections.length - 1}]]`; });
-
             if (type === 'js' || type === 'json') h = highlightJS(h);
             else if (type === 'css') h = highlightCSS(h);
             else if (type === 'html') {
@@ -603,37 +617,25 @@ Happy Coding!
                 });
                 h = h.replace(/\[\[BLOCK(\d+)\]\]/g, (m, i) => blocks[i]);
             }
-
             h = h.replace(/\[\[PROT(\d+)\]\]/g, (m, i) => protections[i]);
             hl.innerHTML = h + "\n";
-            
             updateGutter();
         }
 
         function updateGutter() {
             const lines = textarea.value.split('\n');
             const gutter = document.getElementById('gutter');
-            
             const measure = document.createElement('div');
-            measure.style.cssText = `
-                position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px;
-                font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5;
-                white-space: pre-wrap; word-wrap: break-word; padding: 0;
-            `;
+            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; padding: 0;`;
             document.body.appendChild(measure);
-
             let gutterHTML = "";
             lines.forEach((lineText, i) => {
                 measure.textContent = lineText || " ";
                 const height = measure.clientHeight;
                 const lineCount = Math.round(height / 21);
-                
                 gutterHTML += `<span>${i + 1}</span><br>`;
-                for(let j = 1; j < lineCount; j++) {
-                    gutterHTML += `<span style="visibility:hidden">.</span><br>`;
-                }
+                for(let j = 1; j < lineCount; j++) gutterHTML += `<span style="visibility:hidden">.</span><br>`;
             });
-
             gutter.innerHTML = gutterHTML;
             document.body.removeChild(measure);
             sync();
