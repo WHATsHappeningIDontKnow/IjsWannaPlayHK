@@ -230,20 +230,28 @@
             border-left: 1px solid var(--border);
             overflow: hidden;
             z-index: 10;
-            opacity: 0.8;
-            pointer-events: none;
+            cursor: pointer;
         }
         #minimap-content {
             position: absolute;
             top: 0;
             left: 0;
             transform-origin: top left;
-            transform: scale(0.15); /* Scale down content */
-            width: 600%; /* Compensate for scale (100 / 0.15) */
+            transform: scale(0.15); 
+            width: 600%; 
             font-family: 'Consolas', monospace;
             white-space: pre;
             color: var(--text-muted);
             pointer-events: none;
+        }
+        #minimap-viewport {
+            position: absolute;
+            left: 0;
+            right: 0;
+            background: rgba(128, 128, 128, 0.2);
+            border: 1px solid rgba(128, 128, 128, 0.4);
+            cursor: pointer;
+            pointer-events: none; /* Let clicks pass to container logic */
         }
         
         /* Find Widget */
@@ -367,7 +375,10 @@
                         <pre id="highlighting"><code id="hl-content" class="hljs"></code></pre>
                     </div>
                 </div>
-                <div id="minimap"><div id="minimap-content"></div></div>
+                <div id="minimap">
+                    <div id="minimap-content"></div>
+                    <div id="minimap-viewport"></div>
+                </div>
                 
                 <!-- Find & Replace Widget -->
                 <div id="find-widget">
@@ -376,7 +387,7 @@
                             <input id="find-input" class="find-input" placeholder="Find" onkeydown="if(event.key === 'Enter') findNext()">
                         </div>
                         <button class="find-btn" onclick="findNext()" title="Next match"><svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg></button>
-                        <button class="find-btn" onclick="closeFind()" title="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+                        <button class="find-btn" onclick="closeFind()" title="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 17.59 13.41 12z"/></svg></button>
                     </div>
                     <div class="find-row">
                         <div class="find-input-group">
@@ -592,6 +603,8 @@ Happy Coding!
         const hl = document.getElementById('hl-content');
         const sidebar = document.getElementById('sidebar');
         const minimapContent = document.getElementById('minimap-content');
+        const minimapViewport = document.getElementById('minimap-viewport');
+        const minimap = document.getElementById('minimap');
 
         // CUSTOM TOAST FUNCTION
         function showToast(message, type = 'info') {
@@ -873,18 +886,107 @@ Happy Coding!
                 document.getElementById('find-input').focus();
             }
         }
+        
+        // --- Minimap Scrolling Logic ---
+        const SCALE = 0.15; // Must match CSS transform scale
 
         function sync() { 
             const scroller = document.getElementById('scroll');
+            // Sync Gutter
             document.getElementById('gutter').scrollTop = scroller.scrollTop; 
             
-            // Sync Minimap
-            const percent = scroller.scrollTop / (scroller.scrollHeight - scroller.clientHeight);
-            const mm = document.getElementById('minimap');
-            const mmContent = document.getElementById('minimap-content');
-            // Simply scroll the content up
-            if(mmContent.scrollHeight > mm.clientHeight) {
-                mmContent.style.top = `-${percent * (mmContent.scrollHeight - mm.clientHeight)}px`;
+            // Sync Minimap Viewport
+            const scrollPercent = scroller.scrollTop / scroller.scrollHeight;
+            const viewportHeight = scroller.clientHeight;
+            const contentHeight = scroller.scrollHeight;
+            
+            // Calculate height of viewport indicator on minimap
+            // The minimap shows the full content compressed by SCALE
+            // The viewport indicator should represent the visible area
+            
+            let mapViewportHeight = viewportHeight * SCALE;
+            // Cap it if it's too big (shouldn't happen if CSS is right) or too small
+            if(mapViewportHeight < 20) mapViewportHeight = 20;
+
+            // Calculate top position
+            let topPos = scroller.scrollTop * SCALE;
+            
+            minimapViewport.style.height = mapViewportHeight + 'px';
+            minimapViewport.style.top = topPos + 'px';
+            
+            // Sync Minimap Content Scroll (if content is longer than minimap container)
+            // But for this simple implementation, we assume minimap container scrolls content?
+            // Actually, best approach for VS Code style:
+            // Minimap shows a window of the code. 
+            // Let's scroll the minimap content upwards so the viewport stays relatively centered or visible
+            
+            // Simplified approach: Just move content up based on scroll
+            if(minimapContent.clientHeight * SCALE > minimap.clientHeight) {
+               // Complex scroll syncing is hard without a virtual scroll.
+               // Let's just scroll the minimap content relative to main scroll
+               const mapScrollMax = (minimapContent.clientHeight * SCALE) - minimap.clientHeight;
+               const mainScrollMax = scroller.scrollHeight - scroller.clientHeight;
+               
+               if(mainScrollMax > 0) {
+                   const ratio = scroller.scrollTop / mainScrollMax;
+                   minimapContent.style.top = `-${ratio * mapScrollMax}px`;
+                   minimapViewport.style.top = `${(scroller.scrollTop * SCALE) - (ratio * mapScrollMax)}px`;
+               }
+            } else {
+                minimapContent.style.top = '0px';
+                minimapViewport.style.top = (scroller.scrollTop * SCALE) + 'px';
+            }
+        }
+
+        let isDraggingMap = false;
+
+        minimap.addEventListener('mousedown', (e) => {
+            isDraggingMap = true;
+            moveMinimap(e);
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingMap = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if(isDraggingMap) {
+                e.preventDefault();
+                moveMinimap(e);
+            }
+        });
+
+        function moveMinimap(e) {
+            const rect = minimap.getBoundingClientRect();
+            const clickY = e.clientY - rect.top;
+            
+            // We need to translate this Y position on the minimap back to the main scroll position
+            // Logic: Click Y / Scale = Text Y.
+            // But we also need to center the view on the click if possible
+            
+            const scroller = document.getElementById('scroll');
+            
+            // If minimap content is scrolling (long file), adjustment is needed. 
+            // For simplicity in this lightweight IDE, we'll map absolute position if small, or relative if large.
+            
+            // Let's use the Ratio approach which is robust
+            // Where is the click relative to the *visible* minimap height?
+            // Actually, standard behavior: Click jump to that visual spot.
+            
+            // Adjusted logic considering the simplified sync() above:
+            // Text is scaled by 0.15. 
+            // So 1px on minimap = 1/0.15 = 6.66px on main text.
+            
+            // If minimap fits entirely:
+            if(minimapContent.clientHeight * SCALE <= minimap.clientHeight) {
+                const targetScroll = (clickY / SCALE) - (scroller.clientHeight / 2); // Center view
+                scroller.scrollTop = targetScroll;
+            } else {
+                // If minimap scrolls, it's tricker. 
+                // Let's calculate percentage of click down the container
+                const percent = clickY / minimap.clientHeight;
+                const targetScroll = percent * (scroller.scrollHeight - scroller.clientHeight);
+                 scroller.scrollTop = targetScroll;
             }
         }
         
