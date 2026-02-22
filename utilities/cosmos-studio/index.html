@@ -31,6 +31,8 @@
             --warning: #d29922;
             --success: #3fb950;
             --error: #f85149;
+
+            --minimap-width: 100px;
         }
 
         /* LIGHT THEME OVERRIDES */
@@ -79,33 +81,21 @@
         }
 
         .header-actions { display: flex; gap: 12px; align-items: center; }
-        .btn-save {
-            background: rgba(127, 127, 127, 0.1);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 5px 12px;
-            border-radius: 4px;
+        
+        .btn-icon {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
             cursor: pointer;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
+            padding: 4px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            transition: color 0.2s, background 0.2s;
         }
-
-        .btn-save:hover {
-            background: rgba(127, 127, 127, 0.2);
-            border-color: var(--text-muted);
-        }
-
-        .btn-save:active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-            transform: translateY(1px);
-        }
+        .btn-icon:hover { color: var(--text-main); background: rgba(127,127,127,0.1); }
+        .btn-icon svg { width: 18px; height: 18px; fill: currentColor; }
 
         .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
 
@@ -176,7 +166,7 @@
         .icon-txt { color: #8b949e; }
         .icon-json { color: #d29922; }
 
-        #editor-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        #editor-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .editor-container { display: flex; flex: 1; position: relative; overflow: hidden; }
 
         #gutter { 
@@ -198,6 +188,7 @@
             grid-area: 1 / 1;
             margin: 0; 
             padding: 20px; 
+            padding-right: var(--minimap-width); /* Make space for minimap */
             border: 0; 
             font-family: 'Consolas', monospace; 
             font-size: 14px; 
@@ -228,6 +219,72 @@
             width: 100%;
         }
 
+        /* Minimap Styles */
+        #minimap {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--minimap-width);
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--border);
+            overflow: hidden;
+            z-index: 10;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        #minimap-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            transform: scale(0.15); /* Scale down content */
+            width: 600%; /* Compensate for scale (100 / 0.15) */
+            font-family: 'Consolas', monospace;
+            white-space: pre;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        
+        /* Find Widget */
+        #find-widget {
+            position: absolute;
+            top: 10px;
+            right: calc(var(--minimap-width) + 20px);
+            background: var(--bg-status);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 8px;
+            z-index: 100;
+            width: 300px;
+        }
+        .find-row { display: flex; gap: 6px; align-items: center; }
+        .find-input-group { flex: 1; position: relative; display: flex; align-items: center; }
+        .find-input {
+            width: 100%;
+            background: var(--bg-editor);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .find-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .find-btn:hover { background: rgba(127,127,127,0.2); color: var(--text-main); }
+        .find-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
         /* Prevent highlight.js from overriding the transparent editor background */
         .hljs { background: transparent !important; padding: 0 !important; color: inherit !important; }
 
@@ -251,15 +308,18 @@
         .menu-item svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
 
         #modal-overlay, #settings-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 3000; align-items: flex-start; justify-content: center; padding-top: 100px; }
-        .modal { background: var(--bg-status); border: 1px solid var(--border); padding: 24px; border-radius: 10px; width: 400px; color: var(--text-main); }
+        .modal { background: var(--bg-status); border: 1px solid var(--border); padding: 24px; border-radius: 10px; width: 450px; color: var(--text-main); max-height: 80vh; overflow-y: auto; }
         .modal-types-info { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block; }
         .modal input, .modal select { 
-            background: var(--bg-editor); border: 1px solid var(--border); color: var(--text-main); padding: 10px; width: 100%; border-radius: 4px; margin: 15px 0; 
+            background: var(--bg-editor); border: 1px solid var(--border); color: var(--text-main); padding: 10px; width: 100%; border-radius: 4px; margin: 5px 0 15px 0; 
             user-select: text !important; -webkit-user-select: text !important;
         }
-        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
         .modal-btns button { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-sidebar); color: var(--text-main); }
         .modal-label { font-size: 12px; font-weight: 600; margin-top: 10px; display: block; color: var(--text-muted); }
+        .settings-section { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .settings-section:last-child { border-bottom: none; }
+        .settings-header { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
 
         /* Toast Notifications Styles */
         #toast-container { position: fixed; bottom: 40px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
@@ -283,9 +343,11 @@
             COSMOS STUDIO // LIGHTWEIGHT IDE
         </div>
         <div class="header-actions">
-            <div id="save-status" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">Ready</div>
-            <button class="btn-save" onclick="openSettings()">SETTINGS</button>
-            <button class="btn-save" onclick="saveToLocal()">SAVE PROJECT</button>
+            <!-- Changed default text to be empty/invisible but retain spacing structure if needed -->
+            <div id="save-status" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; transition: opacity 0.3s;"></div>
+            <button class="btn-icon" onclick="openSettings()" title="Settings">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </button>
         </div>
     </header>
 
@@ -301,10 +363,36 @@
                 <div id="gutter"></div>
                 <div class="editor-scroll" id="scroll" onscroll="sync()">
                     <div class="editor-wrap" id="wrap">
-                        <textarea id="editing" spellcheck="false" oninput="handleInput(this.value)"></textarea>
+                        <textarea id="editing" spellcheck="false" oninput="handleInput(this.value)" onkeydown="checkTab(event)"></textarea>
                         <pre id="highlighting"><code id="hl-content" class="hljs"></code></pre>
                     </div>
                 </div>
+                <div id="minimap"><div id="minimap-content"></div></div>
+                
+                <!-- Find & Replace Widget -->
+                <div id="find-widget">
+                    <div class="find-row">
+                        <div class="find-input-group">
+                            <input id="find-input" class="find-input" placeholder="Find" onkeydown="if(event.key === 'Enter') findNext()">
+                        </div>
+                        <button class="find-btn" onclick="findNext()" title="Next match"><svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg></button>
+                        <button class="find-btn" onclick="closeFind()" title="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+                    </div>
+                    <div class="find-row">
+                        <div class="find-input-group">
+                            <input id="replace-input" class="find-input" placeholder="Replace">
+                        </div>
+                        <button class="find-btn" onclick="replaceOne()" title="Replace"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg></button>
+                        <button class="find-btn" onclick="replaceAll()" title="Replace All"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></button>
+                    </div>
+                    <div class="find-row" style="margin-top:4px; border-top:1px solid var(--border); padding-top:4px;">
+                        <div class="find-input-group">
+                            <input id="goto-input" class="find-input" placeholder="Line number..." type="number">
+                        </div>
+                        <button class="find-btn" onclick="gotoLine()" style="width:auto; padding:4px 8px; font-size:10px;">JUMP</button>
+                    </div>
+                </div>
+
             </div>
         </section>
     </div>
@@ -351,26 +439,46 @@
     <!-- Settings Modal -->
     <div id="settings-overlay">
         <div class="modal">
-            <h3 style="margin:0; font-size:14px; margin-bottom: 12px;">Editor Settings</h3>
+            <h3 style="margin:0; font-size:16px; margin-bottom: 20px;">Settings</h3>
             
-            <label class="modal-label">UI Theme</label>
-            <select id="ui-theme-select">
-                <option value="dark">Dark (Default)</option>
-                <option value="light">Light</option>
-            </select>
+            <div class="settings-section">
+                <div class="settings-header">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9zm0 16a7 7 0 1 1 7-7 7 7 0 0 1-7 7z"/></svg> 
+                    Appearance
+                </div>
+                <label class="modal-label">UI Theme</label>
+                <select id="ui-theme-select">
+                    <option value="dark">Dark (Default)</option>
+                    <option value="light">Light</option>
+                </select>
 
-            <label class="modal-label">Syntax Highlighting</label>
-            <select id="syntax-theme-select">
-            	<option value="atom">Atom One (Default)</option>
-                <option value="dracula">Dracula (None)</option>
-                <option value="github">GitHub</option>
-                <option value="hybrid">Hybrid</option>
-                <option value="stackoverflow">Stack Overflow</option>
-            </select>
+                <label class="modal-label">Syntax Highlighting</label>
+                <select id="syntax-theme-select">
+                    <option value="atom">Atom One (Default)</option>
+                    <option value="dracula">Dracula</option>
+                    <option value="github">GitHub</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="stackoverflow">Stack Overflow</option>
+                </select>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-header">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 17v2h6v-2H3M3 5v2h10V5H3m10 16v-2h8v-2h-8v-2h-2v6h2M7 9v2H3v2h4v2h2V9H7m14 4v-2H11v2h10m-6-4h6V5h-6v2z"/></svg>
+                    System
+                </div>
+                <div style="margin-top: 15px;">
+                    <button onclick="saveToLocal(); closeSettings();" style="width: 100%; background: var(--bg-sidebar); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                        Force Save Project
+                    </button>
+                    <span style="display: block; font-size: 10px; color: var(--text-muted); margin-top: 5px; text-align: center;">Projects auto-save every 30s. Use this to save immediately.</span>
+                </div>
+            </div>
 
             <div class="modal-btns">
-                <button onclick="closeSettings()">Close</button>
-                <button onclick="applySettings()" style="background:var(--accent); border:none; color:white;">Apply</button>
+                <button onclick="closeSettings()">Cancel</button>
+                <button onclick="applySettings()" style="background:var(--accent); border:none; color:white;">Apply Changes</button>
             </div>
         </div>
     </div>
@@ -470,6 +578,7 @@ Your lightweight, browser-based coding environment.
 4. PRO TIPS
     - Tabs: You can open multiple files; use the tab bar to switch between them.
     - Persistence: Even if you refresh the page, your files will stay here!
+    - Ctrl+F / Cmd+F: Open Find and Replace menu.
         
 If you notice any bugs (especially with syntax highlighting) or have suggestions for new features, please report them to the issues page on the Celestrium Online Github Repository (see the about section).
 
@@ -482,6 +591,7 @@ Happy Coding!
         const textarea = document.getElementById('editing');
         const hl = document.getElementById('hl-content');
         const sidebar = document.getElementById('sidebar');
+        const minimapContent = document.getElementById('minimap-content');
 
         // CUSTOM TOAST FUNCTION
         function showToast(message, type = 'info') {
@@ -528,12 +638,20 @@ Happy Coding!
             });
         };
 
+        let saveTimeout;
         function saveToLocal(isAuto = false) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
             const status = document.getElementById('save-status');
             if(status) {
+                // Clear existing timeout to prevent overlap
+                if (saveTimeout) clearTimeout(saveTimeout);
+                
                 status.innerText = isAuto ? "Auto-Saved" : "Project Saved";
-                setTimeout(() => status.innerText = "Synced", 2000);
+                status.style.opacity = '1';
+                
+                saveTimeout = setTimeout(() => {
+                    status.style.opacity = '0'; 
+                }, 5000);
             }
         }
 
@@ -557,9 +675,11 @@ Happy Coding!
         }
 
         window.addEventListener('contextmenu', e => {
-            e.preventDefault();
             const item = e.target.closest('.file-item');
-            if (item) triggerContextMenu(e, parseInt(item.dataset.index));
+            if (item) {
+                e.preventDefault();
+                triggerContextMenu(e, parseInt(item.dataset.index));
+            }
         });
 
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
@@ -707,12 +827,14 @@ Happy Coding!
                 try {
                     highlightedHTML = hljs.highlight(val, { language: lang }).value;
                 } catch (e) {
-                    // Fallback to basic escaping if highlight.js encounters an issue
                     highlightedHTML = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 }
             }
             
             hl.innerHTML = highlightedHTML + "\n";
+            // Update minimap content
+            minimapContent.innerText = val;
+            
             updateGutter();
         }
 
@@ -720,7 +842,7 @@ Happy Coding!
             const lines = textarea.value.split('\n');
             const gutter = document.getElementById('gutter');
             const measure = document.createElement('div');
-            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: break-word;`;
+            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;`;
             document.body.appendChild(measure);
             let gutterHTML = "";
             lines.forEach((lineText, i) => {
@@ -735,9 +857,125 @@ Happy Coding!
             sync();
         }
 
+        function checkTab(e) {
+            if(e.key === 'Tab') {
+                e.preventDefault();
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                textarea.value = textarea.value.substring(0, start) + "\t" + textarea.value.substring(end);
+                textarea.selectionStart = textarea.selectionEnd = start + 1;
+                handleInput(textarea.value);
+            }
+            // Add Find shortcut
+            if((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('find-widget').style.display = 'flex';
+                document.getElementById('find-input').focus();
+            }
+        }
+
         function sync() { 
             const scroller = document.getElementById('scroll');
             document.getElementById('gutter').scrollTop = scroller.scrollTop; 
+            
+            // Sync Minimap
+            const percent = scroller.scrollTop / (scroller.scrollHeight - scroller.clientHeight);
+            const mm = document.getElementById('minimap');
+            const mmContent = document.getElementById('minimap-content');
+            // Simply scroll the content up
+            if(mmContent.scrollHeight > mm.clientHeight) {
+                mmContent.style.top = `-${percent * (mmContent.scrollHeight - mm.clientHeight)}px`;
+            }
+        }
+        
+        // Find & Replace Functions
+        function closeFind() { document.getElementById('find-widget').style.display = 'none'; }
+        
+        function findNext() {
+            const term = document.getElementById('find-input').value;
+            if(!term) return;
+            
+            const text = textarea.value;
+            // Search from current position
+            let startPos = textarea.selectionEnd;
+            let index = text.indexOf(term, startPos);
+            
+            // Wrap around
+            if(index === -1) index = text.indexOf(term, 0);
+            
+            if(index !== -1) {
+                textarea.focus();
+                textarea.setSelectionRange(index, index + term.length);
+                
+                // Scroll to view
+                const lines = text.substr(0, index).split('\n');
+                const lineNum = lines.length;
+                const lineHeight = 21; // Approx
+                document.getElementById('scroll').scrollTop = (lineNum - 5) * lineHeight; 
+            } else {
+                showToast("No matches found");
+            }
+        }
+
+        function replaceOne() {
+            const term = document.getElementById('find-input').value;
+            const rep = document.getElementById('replace-input').value;
+            
+            // Only replace if currently selected matches
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            if(selectedText === term) {
+                const text = textarea.value;
+                const newText = text.substring(0, start) + rep + text.substring(end);
+                textarea.value = newText;
+                handleInput(newText);
+                textarea.setSelectionRange(start, start + rep.length);
+                findNext(); // Go to next
+            } else {
+                findNext(); // Find one first
+            }
+        }
+
+        function replaceAll() {
+            const term = document.getElementById('find-input').value;
+            const rep = document.getElementById('replace-input').value;
+            if(!term) return;
+            
+            const text = textarea.value;
+            const newText = text.split(term).join(rep);
+            if(text !== newText) {
+                textarea.value = newText;
+                handleInput(newText);
+                showToast("Replaced all occurrences");
+            } else {
+                showToast("Nothing to replace");
+            }
+        }
+
+        function gotoLine() {
+            const num = parseInt(document.getElementById('goto-input').value);
+            if(!num) return;
+            
+            const lines = textarea.value.split('\n');
+            if(num < 1 || num > lines.length) {
+                showToast(`Line ${num} not found`, 'error');
+                return;
+            }
+            
+            // Calculate char position approx
+            let charPos = 0;
+            for(let i=0; i < num-1; i++) {
+                charPos += lines[i].length + 1; // +1 for newline
+            }
+            
+            textarea.focus();
+            textarea.setSelectionRange(charPos, charPos);
+            
+            // Scroll
+            const lineHeight = 21;
+            document.getElementById('scroll').scrollTop = (num - 10) * lineHeight;
         }
         
         window.addEventListener('resize', updateGutter);
