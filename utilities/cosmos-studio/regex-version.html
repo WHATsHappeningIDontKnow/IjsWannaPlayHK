@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Celestrium Online | Cosmos Studio (Code Editor)</title>
     <link rel="icon" type="image/x-icon" href="favicon.png?login.live.com">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-
     <style>
         :root {
             --bg-editor: #0d1117;
@@ -207,9 +203,6 @@
             width: 100%;
         }
 
-        /* Prevent highlight.js from overriding the transparent editor background */
-        .hljs { background: transparent !important; padding: 0 !important; }
-
         .hl-key  { color: var(--hl-keyword); }
         .hl-str  { color: var(--hl-string); }
         .hl-tag  { color: var(--hl-tag); }
@@ -279,7 +272,7 @@
                 <div class="editor-scroll" id="scroll" onscroll="sync()">
                     <div class="editor-wrap" id="wrap">
                         <textarea id="editing" spellcheck="false" oninput="handleInput(this.value)"></textarea>
-                        <pre id="highlighting"><code id="hl-content" class="hljs"></code></pre>
+                        <pre id="highlighting"><code id="hl-content"></code></pre>
                     </div>
                 </div>
             </div>
@@ -366,7 +359,7 @@ Your lightweight, browser-based coding environment.
 If you notice any bugs (especially with syntax highlighting) or have suggestions for new features, please report them to the issues page on the Celestrium Online Github Repository (see the about section of Celestrium Online for the link).
 
 Happy Coding!
--- The Celestrium Online Team` 
+-- The Celestrium Online Team`
             }
         ];
 
@@ -577,34 +570,55 @@ Happy Coding!
             }
         }
 
+        function highlightJS(code) {
+            return code
+                .replace(/\b(const|let|var|function|return|if|else|for|while|class|export|import|true|false|null|async|await|new|this)\b/g, '<span class="hl-key">$1</span>')
+                .replace(/(?<!=)(?<!["'])\b(\d+(?:\.\d+)?)\b/g, '<span class="hl-func">$1</span>')
+                .replace(/\b(\w+)(?=\s*\()/g, '<span class="hl-func">$1</span>');
+        }
+
+        function highlightCSS(code) {
+            return code
+                .replace(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b/g, '<span class="hl-func">#$1</span>')
+                .replace(/\b([a-z-]+)(?=\s*:)/gi, '<span class="hl-attr">$1</span>')
+                .replace(/\b(\d+(?:\.\d+)?)(px|rem|em|vh|vw|%|ms|s|deg)?\b/gi, (m, num, unit) => {
+                    let res = `<span class="hl-func">${num}</span>`;
+                    if (unit) res += `<span class="hl-key">${unit}</span>`;
+                    return res;
+                })
+                .replace(/(?<![0-9a-zA-Z>])([.#][a-zA-Z0-9_-]+)/g, m => `<span class="hl-tag">${m}</span>`)
+                .replace(/\b(html|body|main|section|aside|header|footer|div|p|h[1-6]|span|a|ul|li)\b(?=\s*\{)/gi, '<span class="hl-tag">$1</span>');
+        }
+
         function handleInput(val) {
             if (activeIdx === -1) return;
             files[activeIdx].content = val;
-            
+            let h = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const type = files[activeIdx].type;
-            const langMap = {
-                'html': 'xml',
-                'css': 'css',
-                'js': 'javascript',
-                'json': 'json',
-                'txt': 'plaintext'
-            };
-            const lang = langMap[type] || 'plaintext';
-            
-            let highlightedHTML = "";
-            
-            if (val.trim() === "") {
-                highlightedHTML = "";
-            } else {
-                try {
-                    highlightedHTML = hljs.highlight(val, { language: lang }).value;
-                } catch (e) {
-                    // Fallback to basic escaping if highlight.js encounters an issue
-                    highlightedHTML = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                }
+            const protections = [];
+            h = h.replace(/\/\*[\s\S]*?\*\//g, m => { protections.push(`<span class="hl-comm">${m}</span>`); return `[[PROT${protections.length - 1}]]`; });
+            h = h.replace(/(?<![:"'])\/\/.*/g, m => { protections.push(`<span class="hl-comm">${m}</span>`); return `[[PROT${protections.length - 1}]]`; });
+            h = h.replace(/(['"|`])(?:(?!\1).|\\\1)*\1/g, m => { protections.push(`<span class="hl-str">${m}</span>`); return `[[PROT${protections.length - 1}]]`; });
+            if (type === 'js' || type === 'json') h = highlightJS(h);
+            else if (type === 'css') h = highlightCSS(h);
+            else if (type === 'html') {
+                const blocks = [];
+                h = h.replace(/(&lt;style&gt;)([\s\S]*?)(&lt;\/style&gt;)/gi, (m, open, content, close) => {
+                    blocks.push(`<span class="hl-tag">${open}</span>${highlightCSS(content)}<span class="hl-tag">${close}</span>`);
+                    return `[[BLOCK${blocks.length - 1}]]`;
+                });
+                h = h.replace(/(&lt;script&gt;)([\s\S]*?)(&lt;\/script&gt;)/gi, (m, open, content, close) => {
+                    blocks.push(`<span class="hl-tag">${open}</span>${highlightJS(content)}<span class="hl-tag">${close}</span>`);
+                    return `[[BLOCK${blocks.length - 1}]]`;
+                });
+                h = h.replace(/(&lt;\/?[a-z1-6]+)([\s\S]*?)(&gt;)/gi, (m, start, mid, end) => {
+                    const midAttr = mid.replace(/\b([a-z-]+)(?==)/gi, '<span class="hl-attr">$1</span>');
+                    return `<span class="hl-tag">${start}</span><span style="color:var(--text-muted)">${midAttr}</span><span class="hl-tag">${end}</span>`;
+                });
+                h = h.replace(/\[\[BLOCK(\d+)\]\]/g, (m, i) => blocks[i]);
             }
-            
-            hl.innerHTML = highlightedHTML + "\n";
+            h = h.replace(/\[\[PROT(\d+)\]\]/g, (m, i) => protections[i]);
+            hl.innerHTML = h + "\n";
             updateGutter();
         }
 
