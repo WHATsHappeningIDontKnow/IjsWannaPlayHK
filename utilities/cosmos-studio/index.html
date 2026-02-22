@@ -6,11 +6,13 @@
     <title>Celestrium Online | Cosmos Studio (Code Editor)</title>
     <link rel="icon" type="image/x-icon" href="favicon.png?login.live.com">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <!-- Added ID for dynamic swapping -->
+    <link id="highlight-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <style>
         :root {
+            /* DARK THEME (DEFAULT) */
             --bg-editor: #0d1117;
             --bg-sidebar: #161b22;
             --bg-status: #21262d;
@@ -31,6 +33,25 @@
             --error: #f85149;
         }
 
+        /* LIGHT THEME OVERRIDES */
+        body.light-theme {
+            --bg-editor: #ffffff;
+            --bg-sidebar: #f6f8fa;
+            --bg-status: #ffffff;
+            --border: #d0d7de;
+            --accent: #0969da;
+            --text-main: #24292f;
+            --text-muted: #57606a;
+            
+            /* Syntax highlighting colors for manual fallback */
+            --hl-keyword: #cf222e;
+            --hl-string: #0a3069;
+            --hl-tag: #116329;
+            --hl-func: #8250df;
+            --hl-attr: #0550ae;
+            --hl-comm: #6e7781;
+        }
+
         * { box-sizing: border-box; outline: none; }
 
         body {
@@ -47,8 +68,8 @@
         }
 
         ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
         header {
             display: flex; justify-content: space-between; align-items: center;
@@ -59,7 +80,7 @@
 
         .header-actions { display: flex; gap: 12px; align-items: center; }
         .btn-save {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(127, 127, 127, 0.1);
             color: var(--text-main);
             border: 1px solid var(--border);
             padding: 5px 12px;
@@ -75,9 +96,8 @@
         }
 
         .btn-save:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(127, 127, 127, 0.2);
             border-color: var(--text-muted);
-            color: white;
         }
 
         .btn-save:active {
@@ -128,15 +148,16 @@
             padding: 8px 16px; font-size: 13px; cursor: pointer; display: flex; 
             align-items: center; gap: 10px; border-left: 2px solid transparent;
             position: relative;
+            color: var(--text-main);
         }
         .file-item:hover { background: rgba(139, 148, 158, 0.1); }
-        .file-item.active { background: #21262d; border-left: 2px solid var(--accent); color: white; }
+        .file-item.active { background: var(--bg-status); border-left: 2px solid var(--accent); }
 
         .file-item-dots {
             margin-left: auto; padding: 0 8px; color: var(--text-muted); font-size: 18px; visibility: hidden; border-radius: 4px;
         }
         .file-item:hover .file-item-dots { visibility: visible; }
-        .file-item-dots:hover { background: var(--bg-status); color: white; }
+        .file-item-dots:hover { background: var(--bg-status); }
 
         #tab-bar { display: flex; background: var(--bg-sidebar); height: 35px; overflow-x: auto; border-bottom: 1px solid var(--border); }
         .tab {
@@ -159,7 +180,7 @@
         .editor-container { display: flex; flex: 1; position: relative; overflow: hidden; }
 
         #gutter { 
-            width: 50px; padding: 20px 0; text-align: right; color: #4b535d; 
+            width: 50px; padding: 20px 0; text-align: right; color: var(--text-muted); 
             font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; 
             border-right: 1px solid var(--border); overflow: hidden; flex-shrink: 0;
             background: var(--bg-editor);
@@ -191,7 +212,7 @@
             z-index: 1; 
             color: transparent; 
             background: transparent; 
-            caret-color: #fff; 
+            caret-color: var(--text-main); 
             resize: none; 
             width: 100%;
             height: 100%;
@@ -208,7 +229,7 @@
         }
 
         /* Prevent highlight.js from overriding the transparent editor background */
-        .hljs { background: transparent !important; padding: 0 !important; }
+        .hljs { background: transparent !important; padding: 0 !important; color: inherit !important; }
 
         .hl-key  { color: var(--hl-keyword); }
         .hl-str  { color: var(--hl-string); }
@@ -218,7 +239,7 @@
         .hl-comm { color: var(--hl-comm); font-style: italic; }
 
         #context-menu { 
-            display: none; position: fixed; background: #161b22; 
+            display: none; position: fixed; background: var(--bg-sidebar); 
             border: 1px solid var(--border); border-radius: 8px; z-index: 2000; 
             width: 200px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
         }
@@ -229,20 +250,21 @@
         .menu-item:hover { background: var(--accent); color: white; }
         .menu-item svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-        #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 3000; align-items: flex-start; justify-content: center; padding-top: 100px; }
-        .modal { background: #21262d; border: 1px solid var(--border); padding: 24px; border-radius: 10px; width: 400px; }
+        #modal-overlay, #settings-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 3000; align-items: flex-start; justify-content: center; padding-top: 100px; }
+        .modal { background: var(--bg-status); border: 1px solid var(--border); padding: 24px; border-radius: 10px; width: 400px; color: var(--text-main); }
         .modal-types-info { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block; }
-        .modal input { 
-            background: var(--bg-editor); border: 1px solid var(--border); color: white; padding: 10px; width: 100%; border-radius: 4px; margin: 15px 0; 
+        .modal input, .modal select { 
+            background: var(--bg-editor); border: 1px solid var(--border); color: var(--text-main); padding: 10px; width: 100%; border-radius: 4px; margin: 15px 0; 
             user-select: text !important; -webkit-user-select: text !important;
         }
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
-        .modal-btns button { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); background: #30363d; color: white; }
+        .modal-btns button { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-sidebar); color: var(--text-main); }
+        .modal-label { font-size: 12px; font-weight: 600; margin-top: 10px; display: block; color: var(--text-muted); }
 
         /* Toast Notifications Styles */
         #toast-container { position: fixed; bottom: 40px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { 
-            background: #21262d; color: #c9d1d9; border: 1px solid var(--border); 
+            background: var(--bg-status); color: var(--text-main); border: 1px solid var(--border); 
             padding: 12px 20px; border-radius: 6px; font-size: 13px; 
             box-shadow: 0 8px 24px rgba(0,0,0,0.5); border-left: 4px solid var(--accent); 
             animation: slideIn 0.3s ease forwards; min-width: 200px;
@@ -250,7 +272,7 @@
         .toast.error { border-left-color: var(--error); }
         @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        footer { height: 24px; background: var(--bg-status); color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; }
+        footer { height: 24px; background: var(--bg-status); color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 11px; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -262,6 +284,7 @@
         </div>
         <div class="header-actions">
             <div id="save-status" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">Ready</div>
+            <button class="btn-save" onclick="openSettings()">SETTINGS</button>
             <button class="btn-save" onclick="saveToLocal()">SAVE PROJECT</button>
         </div>
     </header>
@@ -312,6 +335,7 @@
         </div>
     </div>
 
+    <!-- Create/Rename Modal -->
     <div id="modal-overlay">
         <div class="modal">
             <h3 id="modal-title" style="margin:0; font-size:14px; margin-bottom: 8px;">New File</h3>
@@ -319,7 +343,34 @@
             <input type="text" id="modal-input" placeholder="filename.filetype">
             <div class="modal-btns">
                 <button onclick="closeModal()">Cancel</button>
-                <button id="modal-confirm" style="background:var(--accent); border:none;">Create</button>
+                <button id="modal-confirm" style="background:var(--accent); border:none; color:white;">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-overlay">
+        <div class="modal">
+            <h3 style="margin:0; font-size:14px; margin-bottom: 12px;">Editor Settings</h3>
+            
+            <label class="modal-label">UI Theme</label>
+            <select id="ui-theme-select">
+                <option value="dark">Dark (Default)</option>
+                <option value="light">Light</option>
+            </select>
+
+            <label class="modal-label">Syntax Highlighting</label>
+            <select id="syntax-theme-select">
+            	<option value="atom">Atom One (Default)</option>
+                <option value="dracula">Dracula (None)</option>
+                <option value="github">GitHub</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="stackoverflow">Stack Overflow</option>
+            </select>
+
+            <div class="modal-btns">
+                <button onclick="closeSettings()">Close</button>
+                <button onclick="applySettings()" style="background:var(--accent); border:none; color:white;">Apply</button>
             </div>
         </div>
     </div>
@@ -328,7 +379,64 @@
 
     <script>
         const STORAGE_KEY = 'cosmos_studio_project';
+        const PREFS_KEY = 'cosmos_studio_prefs';
         const VALID_EXT = ['html', 'css', 'js', 'txt', 'json'];
+
+        // Syntax Theme URLs - Logic handled in applyLoadedPrefs
+        const SYNTAX_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
+
+        // Load Preferences
+        let prefs = JSON.parse(localStorage.getItem(PREFS_KEY)) || { ui: 'dark', syntax: 'atom' };
+        
+        function applyLoadedPrefs() {
+            // Apply UI Theme
+            if(prefs.ui === 'light') document.body.classList.add('light-theme');
+            else document.body.classList.remove('light-theme');
+            
+            // Apply Syntax Theme based on logic
+            const link = document.getElementById('highlight-theme');
+            let themeFile = 'hybrid.min.css';
+
+            if (prefs.ui === 'light') {
+                if (prefs.syntax === 'atom') themeFile = 'atom-one-light.min.css';
+                else if (prefs.syntax === 'dracula') themeFile = 'dracula.min.css';
+                else if (prefs.syntax === 'github') themeFile = 'github.min.css';
+                else if (prefs.syntax === 'hybrid') themeFile = 'hybrid.min.css';
+                else if (prefs.syntax === 'stackoverflow') themeFile = 'stackoverflow-light.min.css';
+            } else {
+                if (prefs.syntax === 'atom') themeFile = 'atom-one-dark.min.css';
+                else if (prefs.syntax === 'dracula') themeFile = 'dracula.min.css';
+                else if (prefs.syntax === 'github') themeFile = 'github-dark.min.css';
+                else if (prefs.syntax === 'hybrid') themeFile = 'hybrid.min.css';
+                else if (prefs.syntax === 'stackoverflow') themeFile = 'stackoverflow-dark.min.css';
+            }
+
+            link.href = SYNTAX_BASE + themeFile;
+        }
+        applyLoadedPrefs();
+
+        // Settings Functions
+        function openSettings() {
+            document.getElementById('ui-theme-select').value = prefs.ui;
+            document.getElementById('syntax-theme-select').value = prefs.syntax;
+            document.getElementById('settings-overlay').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-overlay').style.display = 'none';
+        }
+
+        function applySettings() {
+            const ui = document.getElementById('ui-theme-select').value;
+            const syntax = document.getElementById('syntax-theme-select').value;
+            
+            prefs = { ui, syntax };
+            localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+            
+            applyLoadedPrefs();
+            closeSettings();
+            showToast("Settings Saved");
+        }
 
         let files = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
             {
@@ -363,7 +471,7 @@ Your lightweight, browser-based coding environment.
     - Tabs: You can open multiple files; use the tab bar to switch between them.
     - Persistence: Even if you refresh the page, your files will stay here!
         
-If you notice any bugs (especially with syntax highlighting) or have suggestions for new features, please report them to the issues page on the Celestrium Online Github Repository (see the about section of Celestrium Online for the link).
+If you notice any bugs (especially with syntax highlighting) or have suggestions for new features, please report them to the issues page on the Celestrium Online Github Repository (see the about section).
 
 Happy Coding!
 -- The Celestrium Online Team` 
@@ -612,7 +720,7 @@ Happy Coding!
             const lines = textarea.value.split('\n');
             const gutter = document.getElementById('gutter');
             const measure = document.createElement('div');
-            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; padding: 0;`;
+            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: break-word;`;
             document.body.appendChild(measure);
             let gutterHTML = "";
             lines.forEach((lineText, i) => {
