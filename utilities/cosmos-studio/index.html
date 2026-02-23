@@ -6,13 +6,11 @@
     <title>Celestrium Online | Cosmos Studio (Code Editor)</title>
     <link rel="icon" type="image/x-icon" href="favicon.png?login.live.com">
     
-    <!-- Added ID for dynamic swapping -->
     <link id="highlight-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <style>
         :root {
-            /* DARK THEME (DEFAULT) */
             --bg-editor: #0d1117;
             --bg-sidebar: #161b22;
             --bg-status: #21262d;
@@ -35,7 +33,6 @@
             --minimap-width: 100px;
         }
 
-        /* LIGHT THEME OVERRIDES */
         body.light-theme {
             --bg-editor: #ffffff;
             --bg-sidebar: #f6f8fa;
@@ -45,7 +42,6 @@
             --text-main: #24292f;
             --text-muted: #57606a;
             
-            /* Syntax highlighting colors for manual fallback */
             --hl-keyword: #cf222e;
             --hl-string: #0a3069;
             --hl-tag: #116329;
@@ -163,17 +159,18 @@
             cursor: pointer; 
             min-width: 120px; 
             max-width: 200px;
-            overflow: hidden; /* Ensure content doesn't spill */
+            overflow: hidden;
         }
         .tab.active { background: var(--bg-editor); color: var(--text-main); border-bottom: 1px solid var(--accent); }
         
-        /* Updated Tab Name handling for overflow */
         .tab-name {
             margin-left: 8px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex: 1; /* Take remaining space */
+            flex: 1; 
+            min-width: 0;
+            display: block;
         }
         
         .tab-close { 
@@ -181,7 +178,7 @@
             font-size: 14px; 
             padding: 2px 6px; 
             border-radius: 4px; 
-            flex-shrink: 0; /* Prevent squishing */
+            flex-shrink: 0;
         }
         .tab-close:hover { color: var(--hl-attr); }
 
@@ -198,18 +195,16 @@
         #editor-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .editor-container { display: flex; flex: 1; position: relative; overflow: hidden; }
 
-        /* EDITOR GUTS (Text Only) */
         #gutter { 
             width: 50px; padding: 20px 0; text-align: right; color: var(--text-muted); 
             font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; 
             border-right: 1px solid var(--border); overflow: hidden; flex-shrink: 0;
             background: var(--bg-editor);
-            display: block; /* Toggled for media files */
+            display: block;
         }
 
         .editor-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; position: relative; }
         
-        /* NO WRAP MODE STYLES */
         .editor-scroll.no-wrap { overflow-x: auto; }
         .editor-scroll.no-wrap #editing, 
         .editor-scroll.no-wrap #highlighting {
@@ -228,7 +223,7 @@
             grid-area: 1 / 1;
             margin: 0; 
             padding: 20px; 
-            padding-right: var(--minimap-width); /* Make space for minimap */
+            padding-right: var(--minimap-width);
             border: 0; 
             font-family: 'Consolas', monospace; 
             font-size: 14px; 
@@ -259,7 +254,6 @@
             width: 100%;
         }
 
-        /* MEDIA PREVIEW PANE */
         #media-preview {
             display: none;
             flex: 1;
@@ -271,11 +265,10 @@
             padding: 20px;
             flex-direction: column;
         }
-        /* RESIZING FIX: Ensure content fits */
         #media-preview img, #media-preview video { 
             max-width: 100%; 
             max-height: 100%; 
-            object-fit: contain; /* Keeps aspect ratio */
+            object-fit: contain;
             box-shadow: 0 0 20px rgba(0,0,0,0.5); 
         }
         #media-preview audio { width: 300px; margin-bottom: 20px;}
@@ -290,7 +283,6 @@
             border-bottom: 1px solid var(--accent);
         }
 
-        /* Minimap Styles */
         #minimap {
             position: absolute;
             right: 0;
@@ -302,7 +294,7 @@
             overflow: hidden;
             z-index: 10;
             cursor: pointer;
-            display: block; /* Toggled for media files */
+            display: block;
         }
         #minimap-content {
             position: absolute;
@@ -323,10 +315,9 @@
             background: rgba(128, 128, 128, 0.2);
             border: 1px solid rgba(128, 128, 128, 0.4);
             cursor: pointer;
-            pointer-events: none; /* Let clicks pass to container logic */
+            pointer-events: none;
         }
         
-        /* Find Widget */
         #find-widget {
             position: absolute;
             top: 10px;
@@ -365,7 +356,6 @@
         .find-btn:hover { background: rgba(127,127,127,0.2); color: var(--text-main); }
         .find-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
-        /* Prevent highlight.js from overriding the transparent editor background */
         .hljs { background: transparent !important; padding: 0 !important; color: inherit !important; }
 
         .hl-key  { color: var(--hl-keyword); }
@@ -401,7 +391,6 @@
         .settings-section:last-child { border-bottom: none; }
         .settings-header { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
 
-        /* Toggle Switch Styling */
         .setting-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .setting-row span { font-size: 13px; color: var(--text-main); font-weight: 500; }
         
@@ -435,8 +424,6 @@
         input:focus + .slider { box-shadow: 0 0 1px var(--accent); }
         input:checked + .slider:before { transform: translateX(18px); }
 
-
-        /* Toast Notifications Styles */
         #toast-container { position: fixed; bottom: 40px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { 
             background: var(--bg-status); color: var(--text-main); border: 1px solid var(--border); 
@@ -482,7 +469,6 @@
                     </div>
                 </div>
                 
-                <!-- Native Media Preview Container -->
                 <div id="media-preview"></div>
 
                 <div id="minimap">
@@ -490,7 +476,6 @@
                     <div id="minimap-viewport"></div>
                 </div>
                 
-                <!-- Find & Replace Widget -->
                 <div id="find-widget">
                     <div class="find-row">
                         <div class="find-input-group">
@@ -550,7 +535,6 @@
         </div>
     </div>
 
-    <!-- Create/Rename Modal -->
     <div id="modal-overlay">
         <div class="modal">
             <h3 id="modal-title" style="margin:0; font-size:14px; margin-bottom: 8px;">New File</h3>
@@ -563,7 +547,6 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
     <div id="settings-overlay">
         <div class="modal">
             <h3 style="margin:0; font-size:16px; margin-bottom: 20px;">Settings</h3>
@@ -624,35 +607,28 @@
         const STORAGE_KEY = 'cosmos_studio_project';
         const PREFS_KEY = 'cosmos_studio_prefs';
         
-        // File type definitions
         const CREATE_EXT = ['html', 'css', 'js', 'txt', 'json', 'py', 'md'];
         const UPLOAD_EXT = ['png', 'jpg', 'jpeg', 'pdf', 'ico', 'mp3', 'mp4', 'wav'];
         const ALL_VALID_EXT = [...CREATE_EXT, ...UPLOAD_EXT];
         const BINARY_EXT = ['png', 'jpg', 'jpeg', 'pdf', 'ico', 'mp3', 'mp4', 'wav'];
         
-        // LIMIT: 50MB in Bytes
         const MAX_FILE_SIZE = 50 * 1024 * 1024; 
 
-        // Syntax Theme URLs - Logic handled in applyLoadedPrefs
         const SYNTAX_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
 
-        // Load Preferences
         let prefs = JSON.parse(localStorage.getItem(PREFS_KEY)) || { ui: 'dark', syntax: 'atom', lineWrap: true };
         
         function applyLoadedPrefs() {
-            // Apply UI Theme
             if(prefs.ui === 'light') document.body.classList.add('light-theme');
             else document.body.classList.remove('light-theme');
             
-            // Apply Line Wrap
             const scrollContainer = document.getElementById('scroll');
-            if (prefs.lineWrap === false) { // Explicit check as it defaults to true
+            if (prefs.lineWrap === false) {
                 scrollContainer.classList.add('no-wrap');
             } else {
                 scrollContainer.classList.remove('no-wrap');
             }
 
-            // Apply Syntax Theme based on logic
             const link = document.getElementById('highlight-theme');
             let themeFile = 'hybrid.min.css';
 
@@ -671,12 +647,10 @@
             }
 
             link.href = SYNTAX_BASE + themeFile;
-            // Force update to handle wrap changes affecting height/gutter
             setTimeout(updateGutter, 50);
         }
         applyLoadedPrefs();
 
-        // Settings Functions
         function openSettings() {
             document.getElementById('ui-theme-select').value = prefs.ui;
             document.getElementById('syntax-theme-select').value = prefs.syntax;
@@ -774,7 +748,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         const editorScroll = document.getElementById('scroll');
         const findWidget = document.getElementById('find-widget');
 
-        // CUSTOM TOAST FUNCTION
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -788,7 +761,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             }, 4000);
         }
 
-        // Validate file extension against allowed lists
         function validateFileName(name, allowedList = ALL_VALID_EXT, excludeIdx = -1) {
             const ext = name.split('.').pop().toLowerCase();
             if (!allowedList.includes(ext)) {
@@ -811,7 +783,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             Array.from(e.dataTransfer.files).forEach(file => {
                 if(!validateFileName(file.name, ALL_VALID_EXT)) return;
                 
-                // CHECK SIZE LIMIT
                 if(file.size > MAX_FILE_SIZE) {
                     showToast(`File "${file.name}" exceeds 50MB limit.`, 'error');
                     return;
@@ -820,7 +791,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 const reader = new FileReader();
                 const ext = file.name.split('.').pop().toLowerCase();
                 
-                // Decide how to read based on extension
                 if(BINARY_EXT.includes(ext)) {
                     reader.onload = (ev) => {
                         files.push({ name: file.name, type: ext, content: ev.target.result }); // Base64 for binary
@@ -845,7 +815,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
                 const status = document.getElementById('save-status');
                 if(status) {
-                    // Clear existing timeout to prevent overlap
                     if (saveTimeout) clearTimeout(saveTimeout);
                     
                     status.innerText = isAuto ? "Auto-Saved" : "Project Saved";
@@ -856,7 +825,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                     }, 5000);
                 }
             } catch (e) {
-                // Handle quota exceeded, likely due to large binary files
                 if(e.name === 'QuotaExceededError') {
                     showToast("Storage Full! Delete files or clear data.", "error");
                 }
@@ -877,14 +845,11 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             rightClickIdx = index;
             const type = files[rightClickIdx].type;
             
-            // Show/Hide context items based on type
             document.getElementById('menu-run').style.display = type === 'html' ? 'flex' : 'none';
             document.getElementById('menu-run-py').style.display = type === 'py' ? 'flex' : 'none';
             document.getElementById('menu-preview-md').style.display = type === 'md' ? 'flex' : 'none';
             document.getElementById('menu-json').style.display = type === 'json' ? 'flex' : 'none';
             
-            // Binary files cannot be duplicated simply as text or beautified/run
-            // But we allow download/delete/rename for all
             document.getElementById('menu-del').style.display = files.length > 1 ? 'flex' : 'none';
             
             const menu = document.getElementById('context-menu');
@@ -901,15 +866,12 @@ Report bugs at: github.com/celestrium-games/portal/issues`
 
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
         
-        // GLOBAL SHORTCUT LISTENER
         window.addEventListener('keydown', (e) => {
-            // CTRL/CMD + S = Save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 saveToLocal();
             }
             
-            // CTRL/CMD + F = Find (Only valid for text editing)
             if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
                 e.preventDefault();
                 if(activeIdx !== -1 && !BINARY_EXT.includes(files[activeIdx].type)) {
@@ -931,9 +893,7 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 mp3: 'AUD', wav: 'AUD', mp4: 'VID', pdf: 'PDF'
             };
             
-            // Add colors for new types
-            const colorClass = BINARY_EXT.includes(type) ? 'hl-func' : ''; 
-            // Note: reusing hl-func color (orange) for binary files for simplicity or can add specific colors
+            const colorClass = BINARY_EXT.includes(type) ? 'hl-func' : '';
             
             return `<span class="icon icon-${type}" style="${BINARY_EXT.includes(type) ? 'color:var(--hl-func)' : ''}">${icons[type] || '•'}</span>`;
         }
@@ -942,7 +902,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             if (!openFiles.includes(idx)) openFiles.push(idx);
             activeIdx = idx;
             
-            // Hide Find Widget when switching
             document.getElementById('find-widget').style.display = 'none';
             render();
         }
@@ -964,7 +923,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             input.focus();
             document.getElementById('modal-confirm').onclick = () => {
                 const val = input.value.trim();
-                // ONLY VALIDATE AGAINST CREATE_EXT
                 if (!validateFileName(val, CREATE_EXT)) return;
                 const ext = val.split('.').pop().toLowerCase();
                 files.push({ name: val, type: ext, content: '' });
@@ -976,7 +934,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             const f = files[rightClickIdx];
             const input = document.getElementById('modal-input');
             document.getElementById('modal-title').innerText = "Rename File";
-            // Allow renaming to any valid extension (binary or text)
             document.getElementById('modal-info').innerText = "Allowed: Any supported extension";
             document.getElementById('modal-confirm').innerText = "Rename";
             input.value = f.name;
@@ -984,9 +941,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             input.focus();
             document.getElementById('modal-confirm').onclick = () => {
                 const val = input.value.trim();
-                // ALLOW RENAMING TO ANY VALID TYPE, BUT CHECK IF CONVERSION IS VALID?
-                // For simplicity, we just check if it's a supported extension in general.
-                // Note: Renaming binary to text or vice versa won't convert content, but that's user error.
                 if (!validateFileName(val, ALL_VALID_EXT, rightClickIdx)) return;
                 const ext = val.split('.').pop().toLowerCase();
                 files[rightClickIdx].name = val; 
@@ -1020,10 +974,9 @@ Report bugs at: github.com/celestrium-games/portal/issues`
 
         function downloadFile() {
             const f = files[rightClickIdx];
-            // If binary, content is DataURL. If text, content is string.
             let href;
             if(BINARY_EXT.includes(f.type)) {
-                href = f.content; // DataURL
+                href = f.content;
             } else {
                 const blob = new Blob([f.content], {type: 'text/plain'});
                 href = URL.createObjectURL(blob);
@@ -1054,9 +1007,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             win.document.write(`<title>HTML Preview: ${f.name}</title>` + f.content); win.document.close();
         }
 
-        // --- EXECUTIONS & PREVIEWS ---
-        
-        // Helper to load libraries dynamically
         function loadLib(id, url, callback) {
             if (document.getElementById(id)) { callback(); return; }
             const script = document.createElement('script');
@@ -1066,7 +1016,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             document.head.appendChild(script);
         }
 
-        // PYTHON EXECUTION (SKULPT)
         function executePython() {
             const f = files[rightClickIdx];
             const win = window.open('about:blank', '_blank');
@@ -1130,7 +1079,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             win.document.close();
         }
 
-        // MARKDOWN PREVIEW (MARKED)
         function previewMarkdown() {
             const f = files[rightClickIdx];
             loadLib('marked-lib', 'https://cdn.jsdelivr.net/npm/marked/marked.min.js', () => {
@@ -1150,7 +1098,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         }
 
         function render() {
-            // RENDER FILE LIST
             const list = document.getElementById('fileList');
             list.innerHTML = '';
             files.forEach((f, i) => {
@@ -1162,7 +1109,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 list.appendChild(div);
             });
 
-            // RENDER TABS
             const tabBar = document.getElementById('tab-bar');
             tabBar.innerHTML = '';
             openFiles.forEach(idx => {
@@ -1171,7 +1117,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 tab.className = `tab ${idx === activeIdx ? 'active' : ''}`;
                 tab.onclick = () => { activeIdx = idx; render(); };
                 
-                // Using new structure for ellipsis
                 tab.innerHTML = `
                     ${getIcon(f.type)} 
                     <span class="tab-name">${f.name}</span> 
@@ -1180,12 +1125,10 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 tabBar.appendChild(tab);
             });
 
-            // RENDER MAIN CONTENT
             if (activeIdx !== -1 && files[activeIdx]) { 
                 const f = files[activeIdx];
                 
                 if(BINARY_EXT.includes(f.type)) {
-                    // Show Media Preview, Hide Editor
                     gutter.style.display = 'none';
                     editorScroll.style.display = 'none';
                     minimap.style.display = 'none';
@@ -1207,13 +1150,11 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                         video.src = f.content;
                         mediaPreview.appendChild(video);
                     } else if (f.type === 'pdf') {
-                         // TRY EMBED TAG FOR PDF
                          const embed = document.createElement('embed');
                          embed.src = f.content;
                          embed.type = "application/pdf";
                          mediaPreview.appendChild(embed);
                          
-                         // FALLBACK LINK
                          const fallback = document.createElement('div');
                          fallback.className = 'pdf-fallback';
                          fallback.innerHTML = `<br><span style="font-size:11px; opacity:0.7">If PDF does not load, <a href="${f.content}" target="_blank" download="${f.name}">Download</a> to view.</span>`;
@@ -1221,7 +1162,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                     }
 
                 } else {
-                    // Show Editor, Hide Media Preview
                     gutter.style.display = 'block';
                     editorScroll.style.display = 'flex';
                     minimap.style.display = 'block';
@@ -1231,7 +1171,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                     handleInput(textarea.value);
                 }
             } else {
-                // No file open
                  gutter.style.display = 'block';
                  editorScroll.style.display = 'flex';
                  minimap.style.display = 'block';
@@ -1243,7 +1182,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
 
         function handleInput(val) {
             if (activeIdx === -1) return;
-            // Only handle input for text files
             if(BINARY_EXT.includes(files[activeIdx].type)) return;
 
             files[activeIdx].content = val;
@@ -1272,7 +1210,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         }
 
         function updateGutter() {
-            // Only update if visible
             if(gutter.style.display === 'none') return;
 
             const lines = textarea.value.split('\n');
@@ -1282,7 +1219,7 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 'white-space: pre !important; word-wrap: normal !important;' : 
                 'white-space: pre-wrap; word-wrap: break-word;';
                 
-            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; ${wrapStyle}`;
+                measure.style.cssText = `position: absolute; visibility: hidden; top: -9999px; left: -9999px; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; ${wrapStyle}`;
             document.body.appendChild(measure);
             let gutterHTML = "";
             lines.forEach((lineText, i) => {
@@ -1308,12 +1245,10 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             }
         }
         
-        // --- Minimap Scrolling Logic ---
-        const SCALE = 0.15; // Must match CSS transform scale
+        const SCALE = 0.15;
 
         function sync() { 
             const scroller = document.getElementById('scroll');
-            // If hidden (binary mode), skip
             if(scroller.style.display === 'none') return;
 
             document.getElementById('gutter').scrollTop = scroller.scrollTop; 
@@ -1363,7 +1298,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             }
         }
         
-        // Find & Replace Functions
         function closeFind() { document.getElementById('find-widget').style.display = 'none'; }
         
         function findNext() {
@@ -1379,7 +1313,7 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 textarea.setSelectionRange(index, index + term.length);
                 const lines = text.substr(0, index).split('\n');
                 const lineNum = lines.length;
-                const lineHeight = 21; // Approx
+                const lineHeight = 21;
                 document.getElementById('scroll').scrollTop = (lineNum - 5) * lineHeight; 
             } else { showToast("No matches found"); }
         }
