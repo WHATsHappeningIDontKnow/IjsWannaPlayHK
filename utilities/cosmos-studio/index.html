@@ -344,6 +344,29 @@
             border-bottom: 1px solid var(--accent);
         }
 
+        /* --- EMPTY STATE --- */
+        #empty-state {
+            display: none;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-editor);
+            flex-direction: column;
+            gap: 20px;
+            color: var(--text-muted);
+        }
+        .empty-logo { width: 64px; height: 64px; opacity: 0.2; color: var(--text-main); margin-bottom: 10px; }
+        .empty-btns { display: flex; gap: 12px; flex-direction: column; align-items: center; }
+        .empty-btn { 
+            padding: 10px 24px; background: var(--accent); color: white; border: none; 
+            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; width: 200px; justify-content: center;
+            transition: opacity 0.2s;
+        }
+        .empty-btn:hover { opacity: 0.9; }
+        .empty-btn.secondary { background: var(--bg-status); border: 1px solid var(--border); color: var(--text-main); }
+        .empty-btn svg { width: 16px; height: 16px; }
+
         #minimap {
             position: absolute;
             right: 0;
@@ -515,7 +538,7 @@
     </header>
 
     <div class="main-container">
-        <aside id="sidebar" onclick="deselectAll()">
+        <aside id="sidebar" onclick="deselectAll()" oncontextmenu="handleSidebarContext(event)">
             <div class="sidebar-header">
                 EXPLORER 
                 <div class="sidebar-actions">
@@ -542,6 +565,25 @@
                 </div>
                 
                 <div id="media-preview"></div>
+                
+                <div id="empty-state">
+                    <svg class="empty-logo" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+                    <div style="font-size:18px; font-weight:300;">No File Open</div>
+                    <div class="empty-btns">
+                        <button class="empty-btn" onclick="prepCreateFileContext()">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                            Create New File
+                        </button>
+                        <button class="empty-btn" onclick="prepCreateFolderContext()">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
+                            Create New Folder
+                        </button>
+                        <button id="workspace-upload-btn" class="empty-btn secondary" style="display:none;" onclick="triggerWorkspaceUpload()">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            Upload Workspace
+                        </button>
+                    </div>
+                </div>
 
                 <div id="minimap">
                     <div id="minimap-content"></div>
@@ -554,7 +596,7 @@
                             <input id="find-input" class="find-input" placeholder="Find" onkeydown="if(event.key === 'Enter') findNext()">
                         </div>
                         <button class="find-btn" onclick="findNext()" title="Next match"><svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg></button>
-                        <button class="find-btn" onclick="closeFind()" title="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 13.41 12 19 6.41z"/></svg></button>
+                        <button class="find-btn" onclick="closeFind()" title="Close"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 17.59 13.41 12z"/></svg></button>
                     </div>
                     <div class="find-row">
                         <div class="find-input-group">
@@ -618,6 +660,14 @@
 
         <div class="menu-item" id="menu-del" style="color:#f85149" onclick="deleteFile()">
             <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete File
+        </div>
+
+        <!-- NEW EMPTY CONTEXT -->
+        <div class="menu-item" id="menu-new-file" style="display:none;" onclick="prepCreateFileContext()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg> Create New File
+        </div>
+        <div class="menu-item" id="menu-new-folder" style="display:none;" onclick="prepCreateFolderContext()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg> Create New Folder
         </div>
     </div>
 
@@ -691,6 +741,9 @@
             </div>
         </div>
     </div>
+    
+    <!-- Hidden input for folder upload -->
+    <input type="file" id="folder-upload-input" webkitdirectory directory multiple style="display:none;">
     
     <div id="toast-container"></div>
 
@@ -1082,6 +1135,27 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         // --- CONTEXT MENU HANDLERS ---
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
         
+        function handleSidebarContext(e) {
+            // Only trigger if NOT on an item (folder or file item handled separately)
+            if(!e.target.closest('.file-item') && !e.target.closest('.folder-item')) {
+                e.preventDefault();
+                e.stopPropagation();
+                deselectAll();
+                
+                // Show Empty Area Menu (Create File/Folder)
+                document.getElementById('menu-new-file').style.display = 'flex';
+                document.getElementById('menu-new-folder').style.display = 'flex';
+                
+                // Hide Item Options
+                ['menu-run', 'menu-run-py', 'menu-preview-md', 'menu-json', 'menu-del', 'menu-del-folder', 'menu-rename', 'menu-rename-folder', 'menu-dup', 'menu-dl'].forEach(id => {
+                    document.getElementById('context-menu').querySelector(`#${id}`).style.display = 'none';
+                });
+
+                const menu = document.getElementById('context-menu');
+                menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px';
+            }
+        }
+
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
@@ -1194,8 +1268,8 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                         document.getElementById('menu-rename-folder').style.display = 'flex';
                         document.getElementById('menu-del-folder').style.display = 'flex';
                         
-                        // Hide File options
-                        ['menu-run', 'menu-run-py', 'menu-preview-md', 'menu-json', 'menu-del', 'menu-rename', 'menu-dup', 'menu-dl'].forEach(id => {
+                        // Hide everything else
+                        ['menu-run', 'menu-run-py', 'menu-preview-md', 'menu-json', 'menu-del', 'menu-rename', 'menu-dup', 'menu-dl', 'menu-new-file', 'menu-new-folder'].forEach(id => {
                             document.getElementById('context-menu').querySelector(`#${id}`).style.display = 'none';
                         });
 
@@ -1271,7 +1345,7 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                         document.getElementById('menu-rename-folder').style.display = 'flex';
                         document.getElementById('menu-del-folder').style.display = 'flex';
                         
-                        ['menu-run', 'menu-run-py', 'menu-preview-md', 'menu-json', 'menu-del', 'menu-rename', 'menu-dup', 'menu-dl'].forEach(id => {
+                        ['menu-run', 'menu-run-py', 'menu-preview-md', 'menu-json', 'menu-del', 'menu-rename', 'menu-dup', 'menu-dl', 'menu-new-file', 'menu-new-folder'].forEach(id => {
                             document.getElementById('context-menu').querySelector(`#${id}`).style.display = 'none';
                         });
                         const menu = document.getElementById('context-menu');
@@ -1333,6 +1407,8 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 // Hide folder items
                 document.getElementById('menu-rename-folder').style.display = 'none';
                 document.getElementById('menu-del-folder').style.display = 'none';
+                document.getElementById('menu-new-file').style.display = 'none';
+                document.getElementById('menu-new-folder').style.display = 'none';
                 
                 // Show File items
                 document.getElementById('menu-del').style.display = 'flex';
@@ -1427,6 +1503,9 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                     toggleFolder(targetPath);
                 }
                 
+                // Highlight new item
+                selectedItem = { type: 'file', path: targetPath, index: files.length - 1 };
+                
                 openFile(files.length - 1); closeModal(); saveToLocal();
             };
         }
@@ -1459,9 +1538,54 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                     toggleFolder(targetPath);
                 }
                 
-                closeModal(); saveToLocal();
+                // Highlight new folder
+                selectedItem = { type: 'folder', path: newPath };
+                
+                closeModal(); saveToLocal(); render();
             };
         }
+
+        // --- WORKSPACE UPLOAD ---
+        function triggerWorkspaceUpload() {
+            document.getElementById('folder-upload-input').click();
+        }
+        
+        document.getElementById('folder-upload-input').addEventListener('change', async (e) => {
+            const items = Array.from(e.target.files);
+            if(items.length === 0) return;
+            
+            for(let file of items) {
+                const relPath = file.webkitRelativePath || file.name;
+                const pathParts = relPath.split('/');
+                let currentPath = '/';
+                
+                // Create folders from path
+                if(pathParts.length > 1) {
+                    for(let i=0; i<pathParts.length-1; i++) {
+                        const folderName = pathParts[i];
+                        const folderPath = currentPath + folderName + '/';
+                        if(!folders.includes(folderPath)) folders.push(folderPath);
+                        currentPath = folderPath;
+                    }
+                }
+                
+                // Read File
+                const content = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = ev => resolve(ev.target.result);
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    if(BINARY_EXT.includes(ext)) reader.readAsDataURL(file);
+                    else reader.readAsText(file);
+                });
+                
+                const ext = file.name.split('.').pop().toLowerCase();
+                if(ALL_VALID_EXT.includes(ext)) {
+                    files.push({ name: file.name, type: ext, content: content, path: currentPath });
+                }
+            }
+            saveToLocal();
+            render();
+        });
 
         function prepRename() {
             const f = files[rightClickIdx];
@@ -1595,20 +1719,39 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         // --- EDITOR LOGIC ---
 
         function renderMediaOrEditor() {
+            const emptyState = document.getElementById('empty-state');
+            const editorScroll = document.querySelector('.editor-scroll');
+            const gutter = document.getElementById('gutter');
+            const minimap = document.getElementById('minimap');
+            const mediaPreview = document.getElementById('media-preview');
+            const workspaceBtn = document.getElementById('workspace-upload-btn');
+
             if (activeIdx === -1 || !files[activeIdx]) {
                 textarea.value = "";
                 hl.innerHTML = "";
-                document.getElementById('editor-section').style.visibility = 'hidden'; 
+                
+                editorScroll.style.display = 'none';
+                gutter.style.display = 'none';
+                minimap.style.display = 'none';
+                mediaPreview.style.display = 'none';
+                
+                emptyState.style.display = 'flex';
+                
+                // Toggle workspace button
+                if(files.length === 0) workspaceBtn.style.display = 'flex';
+                else workspaceBtn.style.display = 'none';
+                
                 return;
             }
-            document.getElementById('editor-section').style.visibility = 'visible';
+            
+            emptyState.style.display = 'none';
 
             const f = files[activeIdx];
             
             if (BINARY_EXT.includes(f.type)) {
-                document.querySelector('.editor-scroll').style.display = 'none';
-                document.getElementById('gutter').style.display = 'none';
-                document.getElementById('minimap').style.display = 'none';
+                editorScroll.style.display = 'none';
+                gutter.style.display = 'none';
+                minimap.style.display = 'none';
                 mediaPreview.style.display = 'flex';
                 mediaPreview.innerHTML = '';
 
@@ -1638,9 +1781,9 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 }
 
             } else {
-                document.querySelector('.editor-scroll').style.display = 'flex';
-                document.getElementById('gutter').style.display = 'block';
-                document.getElementById('minimap').style.display = 'block';
+                editorScroll.style.display = 'flex';
+                gutter.style.display = 'block';
+                minimap.style.display = 'block';
                 mediaPreview.style.display = 'none';
 
                 textarea.value = f.content;
