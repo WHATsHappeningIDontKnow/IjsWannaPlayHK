@@ -780,6 +780,22 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         });
 
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
+        
+        // GLOBAL SHORTCUT LISTENER
+        window.addEventListener('keydown', (e) => {
+            // CTRL/CMD + S = Save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveToLocal();
+            }
+            
+            // CTRL/CMD + F = Find
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('find-widget').style.display = 'flex';
+                document.getElementById('find-input').focus();
+            }
+        });
 
         function getIcon(type) {
             if(type === 'py') {
@@ -1071,11 +1087,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 textarea.value = textarea.value.substring(0, start) + "\t" + textarea.value.substring(end);
                 textarea.selectionStart = textarea.selectionEnd = start + 1;
                 handleInput(textarea.value);
-            }
-            if((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                e.preventDefault();
-                document.getElementById('find-widget').style.display = 'flex';
-                document.getElementById('find-input').focus();
             }
         }
         
