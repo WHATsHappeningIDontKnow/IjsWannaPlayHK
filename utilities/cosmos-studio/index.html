@@ -139,7 +139,6 @@
             padding-bottom: 20px;
         }
 
-        /* Folder & File Tree Styles */
         .file-item, .folder-item { 
             padding: 6px 16px; 
             font-size: 13px; 
@@ -159,13 +158,11 @@
         .folder-item { color: var(--text-muted); font-weight: 600; }
         .folder-item:hover, .file-item:hover { background: rgba(139, 148, 158, 0.05); }
         
-        /* Highlighted/Selected State */
         .file-item.selected, .folder-item.selected { 
             background: var(--selection); 
             border-left-color: var(--accent);
         }
 
-        /* Drag over specific item */
         .file-item.drag-target, .folder-item.drag-target {
             background: var(--selection);
             border: 1px dashed var(--accent);
@@ -182,7 +179,6 @@
         .folder-content { display: none; }
         .folder-open > .folder-content { display: block; }
 
-        /* Indentation classes */
         .indent-0 { padding-left: 16px; }
         .indent-1 { padding-left: 32px; }
         .indent-2 { padding-left: 48px; }
@@ -344,7 +340,6 @@
             border-bottom: 1px solid var(--accent);
         }
 
-        /* --- EMPTY STATE --- */
         #empty-state {
             display: none;
             flex: 1;
@@ -637,7 +632,6 @@
             <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Rename
         </div>
         
-        <!-- Folder Rename (Context-specific) -->
         <div class="menu-item" id="menu-rename-folder" style="display:none;" onclick="prepRenameFolder()">
             <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Rename Folder
         </div>
@@ -662,7 +656,6 @@
             <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Delete File
         </div>
 
-        <!-- NEW EMPTY CONTEXT -->
         <div class="menu-item" id="menu-new-file" style="display:none;" onclick="prepCreateFileContext()">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg> Create New File
         </div>
@@ -742,7 +735,6 @@
         </div>
     </div>
     
-    <!-- Hidden input for folder upload -->
     <input type="file" id="folder-upload-input" webkitdirectory directory multiple style="display:none;">
     
     <div id="toast-container"></div>
@@ -762,8 +754,7 @@
 
         const SYNTAX_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
 
-        // --- PREFERENCES ---
-        let prefs = JSON.parse(localStorage.getItem(PREFS_KEY)) || { ui: 'dark', syntax: 'atom', lineWrap: true };
+        let prefs = JSON.parse(localStorage.getItem(PREFS_KEY)) || { ui: 'dark', syntax: 'atom', lineWrap: false };
         
         function applyLoadedPrefs() {
             if(prefs.ui === 'light') document.body.classList.add('light-theme');
@@ -823,7 +814,7 @@
         }
 
         function clearAllData() {
-            if(confirm("WARNING: This will delete ALL files and folders!")) {
+            if(confirm("WARNING: This will delete ALL files and folders and restore README.md!")) {
                 localStorage.removeItem(STORAGE_KEY);
                 localStorage.removeItem(FOLDERS_KEY);
                 localStorage.removeItem(COLLAPSED_KEY);
@@ -831,7 +822,6 @@
             }
         }
 
-        // --- DATA & STATE ---
         let files = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
             {
                 name: 'README.md',
@@ -926,9 +916,8 @@ All data is persisted locally in your browser.
         let openFiles = [0], activeIdx = 0, rightClickIdx = -1, rightClickFolder = "", countdown = 30;
         
         let selectedItem = null;
-        let draggedItem = null; // { type: 'file'|'folder', path: string, index?: number }
+        let draggedItem = null;
 
-        // --- ELEMENTS ---
         const textarea = document.getElementById('editing');
         const hl = document.getElementById('hl-content');
         const sidebar = document.getElementById('sidebar');
@@ -940,7 +929,6 @@ All data is persisted locally in your browser.
         const editorScroll = document.getElementById('scroll');
         const findWidget = document.getElementById('find-widget');
 
-        // --- CORE FUNCTIONS ---
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
@@ -980,7 +968,6 @@ All data is persisted locally in your browser.
             document.head.appendChild(script);
         }
 
-        // --- DRAG & DROP LOGIC ---
 
         function handleDragStart(e, type, path, index) {
             draggedItem = { type, path, index };
@@ -999,7 +986,7 @@ All data is persisted locally in your browser.
         function getDropTarget(e) {
             const target = e.target.closest('.folder-item');
             if (target) {
-                return target.dataset.path; // Dropped on a folder
+                return target.dataset.path;
             }
             return '/'; 
         }
@@ -1153,21 +1140,17 @@ All data is persisted locally in your browser.
             }
         }, 1000);
 
-        // --- CONTEXT MENU HANDLERS ---
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
         
         function handleSidebarContext(e) {
-            // Only trigger if NOT on an item (folder or file item handled separately)
             if(!e.target.closest('.file-item') && !e.target.closest('.folder-item')) {
                 e.preventDefault();
                 e.stopPropagation();
                 deselectAll();
                 
-                // Show Empty Area Menu (Create File/Folder)
                 document.getElementById('menu-new-file').style.display = 'flex';
                 document.getElementById('menu-new-folder').style.display = 'flex';
                 
-                // Hide Item Options
                 ['menu-run', 'menu-run-py', 'menu-preview-md', 'menu-json', 'menu-del', 'menu-del-folder', 'menu-rename', 'menu-rename-folder', 'menu-dup', 'menu-dl'].forEach(id => {
                     document.getElementById('context-menu').querySelector(`#${id}`).style.display = 'none';
                 });
@@ -1205,8 +1188,6 @@ All data is persisted locally in your browser.
             
             return `<span class="icon icon-${type}" style="${BINARY_EXT.includes(type) ? 'color:var(--hl-func)' : ''}">${icons[type] || '•'}</span>`;
         }
-
-        // --- SELECTION & RENDERING ---
 
         function deselectAll() {
             selectedItem = null;
@@ -1246,7 +1227,6 @@ All data is persisted locally in your browser.
                     .filter(f => f.path === currentPath)
                     .sort((a, b) => a.name.localeCompare(b.name));
 
-                // Render Folders
                 subFolders.forEach(folderPath => {
                     const parts = folderPath.split('/'); 
                     const folderName = parts[parts.length - 2];
@@ -1258,12 +1238,10 @@ All data is persisted locally in your browser.
                     const header = document.createElement('div');
                     header.className = `folder-item indent-${Math.min(depth, 4)}`;
                     
-                    // Highlight logic
                     if (selectedItem && selectedItem.type === 'folder' && selectedItem.path === folderPath) {
                         header.classList.add('selected');
                     }
                     
-                    // DnD Attributes
                     header.draggable = true;
                     header.ondragstart = (e) => handleDragStart(e, 'folder', folderPath);
                     header.ondragend = handleDragEnd;
@@ -1281,15 +1259,12 @@ All data is persisted locally in your browser.
                     
                     header.oncontextmenu = (e) => {
                         e.preventDefault(); e.stopPropagation();
-                        // Right clicking selects it
                         selectItem(e, 'folder', folderPath);
                         rightClickFolder = folderPath;
                         
-                        // Show ONLY Rename/Delete for folders
                         document.getElementById('menu-rename-folder').style.display = 'flex';
                         document.getElementById('menu-del-folder').style.display = 'flex';
                         
-                        // Hide everything else
                         ['menu-run', 'menu-run-py', 'menu-preview-md', 'menu-json', 'menu-del', 'menu-rename', 'menu-dup', 'menu-dl', 'menu-new-file', 'menu-new-folder'].forEach(id => {
                             document.getElementById('context-menu').querySelector(`#${id}`).style.display = 'none';
                         });
@@ -1404,7 +1379,6 @@ All data is persisted locally in your browser.
             el.dataset.index = f.originalIndex;
             el.dataset.path = f.path; 
 
-            // Draggable
             el.draggable = true;
             el.ondragstart = (e) => handleDragStart(e, 'file', f.path, f.originalIndex);
             el.ondragend = handleDragEnd;
@@ -1421,17 +1395,15 @@ All data is persisted locally in your browser.
             
             el.oncontextmenu = (e) => {
                 e.preventDefault(); e.stopPropagation();
-                selectItem(e, 'file', f.path, f.originalIndex); // Select on right click
+                selectItem(e, 'file', f.path, f.originalIndex);
                 rightClickIdx = f.originalIndex;
                 const type = files[rightClickIdx].type;
                 
-                // Hide folder items
                 document.getElementById('menu-rename-folder').style.display = 'none';
                 document.getElementById('menu-del-folder').style.display = 'none';
                 document.getElementById('menu-new-file').style.display = 'none';
                 document.getElementById('menu-new-folder').style.display = 'none';
                 
-                // Show File items
                 document.getElementById('menu-del').style.display = 'flex';
                 document.getElementById('menu-rename').style.display = 'flex';
                 document.getElementById('menu-dup').style.display = 'flex';
@@ -1460,7 +1432,7 @@ All data is persisted locally in your browser.
             const bar = document.getElementById('tab-bar');
             bar.innerHTML = '';
             openFiles.forEach(idx => {
-                if(!files[idx]) return; // Safety check
+                if(!files[idx]) return;
                 const f = files[idx];
                 const tab = document.createElement('div');
                 tab.className = `tab ${idx === activeIdx ? 'active' : ''}`;
@@ -1484,12 +1456,11 @@ All data is persisted locally in your browser.
             render();
         }
 
-        // --- CONTEXT AWARE CREATION ---
 
         function getCreationTarget() {
-            if (!selectedItem) return '/'; // Default root
+            if (!selectedItem) return '/';
             if (selectedItem.type === 'folder') return selectedItem.path;
-            if (selectedItem.type === 'file') return selectedItem.path; // File's path is its parent folder
+            if (selectedItem.type === 'file') return selectedItem.path;
             return '/';
         }
 
@@ -1508,7 +1479,7 @@ All data is persisted locally in your browser.
             input.value = "";
             document.getElementById('modal-title').innerText = targetPath === '/' ? "New File (Root)" : `New File in ${targetPath}`;
             document.getElementById('modal-info').innerText = "Allowed: " + CREATE_EXT.map(e=>'.'+e).join(', ');
-            input.placeholder = "filename.filetype"; // Reset placeholder for files
+            input.placeholder = "filename.filetype";
             document.getElementById('modal-confirm').innerText = "Create";
             document.getElementById('modal-overlay').style.display = 'flex';
             input.focus();
@@ -1519,12 +1490,10 @@ All data is persisted locally in your browser.
                 const ext = val.split('.').pop().toLowerCase();
                 files.push({ name: val, type: ext, content: '', path: targetPath });
                 
-                // Auto-open parent folder if collapsed
                 if (targetPath !== '/' && collapsed.includes(targetPath)) {
                     toggleFolder(targetPath);
                 }
                 
-                // Highlight new item
                 selectedItem = { type: 'file', path: targetPath, index: files.length - 1 };
                 
                 openFile(files.length - 1); closeModal(); saveToLocal();
@@ -1536,7 +1505,7 @@ All data is persisted locally in your browser.
             input.value = "";
             document.getElementById('modal-title').innerText = targetPath === '/' ? "New Folder (Root)" : `New Folder in ${targetPath}`;
             document.getElementById('modal-info').innerText = "Enter folder name (No spaces/symbols)";
-            input.placeholder = "foldername"; // Specific placeholder for folders
+            input.placeholder = "foldername";
             document.getElementById('modal-confirm').innerText = "Create Folder";
             document.getElementById('modal-overlay').style.display = 'flex';
             input.focus();
@@ -1559,14 +1528,12 @@ All data is persisted locally in your browser.
                     toggleFolder(targetPath);
                 }
                 
-                // Highlight new folder
                 selectedItem = { type: 'folder', path: newPath };
                 
                 closeModal(); saveToLocal(); render();
             };
         }
 
-        // --- WORKSPACE UPLOAD ---
         function triggerWorkspaceUpload() {
             document.getElementById('folder-upload-input').click();
         }
@@ -1580,7 +1547,6 @@ All data is persisted locally in your browser.
                 const pathParts = relPath.split('/');
                 let currentPath = '/';
                 
-                // Create folders from path
                 if(pathParts.length > 1) {
                     for(let i=0; i<pathParts.length-1; i++) {
                         const folderName = pathParts[i];
@@ -1590,7 +1556,6 @@ All data is persisted locally in your browser.
                     }
                 }
                 
-                // Read File
                 const content = await new Promise(resolve => {
                     const reader = new FileReader();
                     reader.onload = ev => resolve(ev.target.result);
@@ -1631,9 +1596,8 @@ All data is persisted locally in your browser.
         }
 
         function prepRenameFolder() {
-            // rightClickFolder e.g. "/src/assets/"
             const parts = rightClickFolder.split('/');
-            const oldName = parts[parts.length - 2]; // last element is empty string
+            const oldName = parts[parts.length - 2];
             const parentPath = rightClickFolder.substring(0, rightClickFolder.length - oldName.length - 1);
 
             const input = document.getElementById('modal-input');
@@ -1652,7 +1616,6 @@ All data is persisted locally in your browser.
                 const newPath = parentPath + newName + '/';
                 if(folders.includes(newPath)) { showToast("Folder exists", "error"); return; }
 
-                // Update Folder List
                 const oldPath = rightClickFolder;
                 folders = folders.map(f => {
                     if(f.startsWith(oldPath)) {
@@ -1661,7 +1624,6 @@ All data is persisted locally in your browser.
                     return f;
                 });
 
-                // Update Files
                 files.forEach(f => {
                     if(f.path.startsWith(oldPath)) {
                         f.path = newPath + f.path.substring(oldPath.length);
@@ -1737,8 +1699,6 @@ All data is persisted locally in your browser.
             if(!BINARY_EXT.includes(f.type)) URL.revokeObjectURL(href);
         }
 
-        // --- EDITOR LOGIC ---
-
         function renderMediaOrEditor() {
             const emptyState = document.getElementById('empty-state');
             const editorScroll = document.querySelector('.editor-scroll');
@@ -1758,7 +1718,6 @@ All data is persisted locally in your browser.
                 
                 emptyState.style.display = 'flex';
                 
-                // Toggle workspace button
                 if(files.length === 0) workspaceBtn.style.display = 'flex';
                 else workspaceBtn.style.display = 'none';
                 
@@ -1817,7 +1776,6 @@ All data is persisted locally in your browser.
             if (activeIdx !== -1) {
                 files[activeIdx].content = val;
                 
-                // Old Highlighting Logic Restored
                 const type = files[activeIdx].type;
                 const langMap = {
                     'html': 'xml', 'css': 'css', 'js': 'javascript', 'json': 'json', 'py': 'python',
@@ -1843,7 +1801,6 @@ All data is persisted locally in your browser.
         }
 
         function updateHighlight() {
-            // Triggered by handleInput usually, but called on load
             handleInput(textarea.value);
         }
 
@@ -1883,7 +1840,6 @@ All data is persisted locally in your browser.
             }
         }
 
-        // --- OLD SCROLL SYNC & MINIMAP LOGIC ---
         const SCALE = 0.15;
 
         function sync() { 
@@ -1938,8 +1894,6 @@ All data is persisted locally in your browser.
         }
 
         window.addEventListener('resize', updateGutter);
-
-        // --- FIND & REPLACE ---
         
         function findNext() {
             const term = document.getElementById('find-input').value;
@@ -2003,8 +1957,6 @@ All data is persisted locally in your browser.
             const lineHeight = 21;
             document.getElementById('scroll').scrollTop = (num - 10) * lineHeight;
         }
-
-        // --- FEATURES ---
 
         function runPreview() {
             const f = files[rightClickIdx];
@@ -2130,7 +2082,6 @@ All data is persisted locally in your browser.
             win.document.close();
         }
 
-        // --- INIT ---
         render();
 
     </script>
