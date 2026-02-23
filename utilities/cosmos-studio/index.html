@@ -827,71 +827,92 @@
                 localStorage.removeItem(STORAGE_KEY);
                 localStorage.removeItem(FOLDERS_KEY);
                 localStorage.removeItem(COLLAPSED_KEY);
-                location.reload();
+                window.location.href = window.location.href;
             }
         }
 
         // --- DATA & STATE ---
         let files = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
             {
-                name: 'README.txt',
-                type: 'txt',
-                path: '/', // Root
-                content: `COSMOS STUDIO
-================================================================
+                name: 'README.md',
+                type: 'md',
+                path: '/',
+                content: `# COSMOS STUDIO
 
-Welcome to your new lightweight, browser-based development environment.
+Welcome to your new lightweight, browser-based development environment.  
 All data is persisted locally in your browser.
 
-[ KEYBOARD SHORTCUTS ]
-----------------------------------------------------------------
-  Ctrl/Cmd + F          Open Find & Replace / Jump to Line
-  Tab               Insert 4 spaces (soft tab)
-  Ctrl/Cmd + S          Force Save (Auto-save runs every 30s)
+---
 
-[ SUPPORTED FILE TYPES ]
-----------------------------------------------------------------
-  [ CREATE & UPLOAD (Editable) ]
-  .html   HTML5       (Live Preview available)
-  .css    CSS3        (Syntax Highlighting)
-  .js     JavaScript  (Syntax Highlighting)
-  .json   JSON        (Auto-formatting available)
-  .py     Python3     (Client-side execution available)
-  .md     Markdown    (Live Preview available)
-  .txt    Plain Text  (Standard editing)
+## KEYBOARD SHORTCUTS
 
-  [ UPLOAD ONLY (Native Preview) ]
-  .png, .jpg, .ico    Images
-  .mp3, .wav          Audio
-  .mp4                Video
-  .pdf                PDF Documents
+| Shortcut        | Description                               |
+|-----------------|-------------------------------------------|
+| Ctrl/Cmd + F    | Open Find & Replace / Jump to Line        |
+| Tab             | Insert 4 spaces (soft tab)                |
+| Ctrl/Cmd + S    | Force Save (Auto-save runs every 30s)     |
 
-[ LIMITATIONS ]
-----------------------------------------------------------------
-  • Upload Limit: 50 MB per file.
+---
 
-[ FEATURES ]
-----------------------------------------------------------------
-  • Local Persistence: Refreshing won't lose your work.
-  • Folder Support: Organize files with nested folders in the sidebar.
-  • Live Previews: Right-click HTML/MD files to render them.
-  • Python Terminal: Run Python code directly in the browser.
-  • Media Support: Upload and view images, audio, video, and PDFs.
-  • Minimap: Navigate large text files easily on the right.
-  • Import/Export: Drag & drop to import; Right-click to download.
+## SUPPORTED FILE TYPES
 
-[ TIPS ]
-----------------------------------------------------------------
-  1. Drag and drop any supported file into the sidebar to open it.
-  2. Right-click any file in the sidebar for the Context Menu.
-  3. Use the 'Settings' gear icon to toggle Light/Dark themes.
+### CREATE & UPLOAD (Editable)
 
-================================================================
-Happy Coding!
+| Extension | Name        | Notes                               |
+|-----------|-------------|-------------------------------------|
+| .html     | HTML5       | (Live Preview available)            |
+| .css      | CSS3        | (Syntax Highlighting)               |
+| .js       | JavaScript  | (Syntax Highlighting)               |
+| .json     | JSON        | (Auto-formatting available)         |
+| .py       | Python3     | (Client-side execution available)   |
+| .md       | Markdown    | (Live Preview available)            |
+| .txt      | Plain Text  | (Standard editing)                  |
+
+### UPLOAD ONLY (Native Preview)
+
+| Extensions          | Type           |
+|---------------------|----------------|
+| .png, .jpg, .ico    | Images         |
+| .mp3, .wav          | Audio          |
+| .mp4                | Video          |
+| .pdf                | PDF Documents  |
+
+---
+
+## LIMITATIONS
+
+• Upload Limit: 50 MB per file.
+
+---
+
+## FEATURES
+
+• Local Persistence: Refreshing won't lose your work.  
+• Folder Support: Organize files with nested folders in the sidebar.  
+• Live Previews: Right-click HTML/MD files to render them.  
+• Python Terminal: Run Python code directly in the browser.  
+• Media Support: Upload and view images, audio, video, and PDFs.  
+• Minimap: Navigate large text files easily on the right.  
+• Import/Export: Drag & drop to import; Right-click to download.
+
+---
+
+## TIPS
+
+1. Drag and drop any supported file into the sidebar to open it.  
+2. Right-click any file in the sidebar for the Context Menu.  
+3. Use the 'Settings' gear icon to toggle Light/Dark themes.
+
+---
+
+## Happy Coding!
+
 -- The Celestrium Online Team
 
-================================================================
-Report bugs at: github.com/celestrium-games/portal/issues`
+---
+
+### Report bugs at  
+[github.com/celestrium-games/portal/issues](https://github.com/celestrium-games/portal/issues)`
             }
         ];
 
@@ -2005,10 +2026,27 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                     return;
                 }
                 win.document.write(`
-                    <html><head><title>Markdown Preview: ${f.name}</title>
-                    <style>body{font-family:system-ui;padding:20px;max-width:800px;margin:0 auto;}</style>
-                    </head><body>${html}</body></html>
-                `);
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Markdown Preview: ${f.name}</title>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css">
+                    <style>
+                        body {
+                            padding: 20px;
+                            background-color: black;
+                        }
+                        .markdown-body { max-width: 900px; margin: 0 auto; }
+                    </style>
+                </head>
+                <body>
+                    <div class="markdown-body">
+                        ${html}
+                    </div>
+                </body>
+                </html>
+            `);
                 win.document.close();
             });
         }
