@@ -21,15 +21,6 @@
       --glass-border: rgba(255, 255, 255, 0.5);
     }
 
-    body.dark {
-      --bg: #0b0e14;
-      --card: rgba(20, 24, 33, 0.7);
-      --text: #f8fafc;
-      --subtext: #94a3b8;
-      --accent: #3b82f6;
-      --glass-border: rgba(255, 255, 255, 0.1);
-    }
-
     html, body {
       height: 100%;
       margin: 0;
@@ -41,14 +32,18 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      position: relative;
+      animation: fadeBody .4s ease;
     }
 
-    /* Background blobs (same style as index.html) */
+    @keyframes fadeBody {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Background blobs */
     .bg-blobs {
       position: fixed;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       z-index: -1;
@@ -72,30 +67,52 @@
       100% { transform: translate(10%, 15%) scale(1.1); }
     }
 
+    /* Layout improvements */
     .page {
       flex: 1;
-      min-height: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 64px;
+      padding: 40px;
     }
 
     .card-404 {
-      width: min(980px, 100%);
-      background: var(--card);
+      width: min(820px, 100%);
+      background: linear-gradient(
+        to bottom right,
+        rgba(255,255,255,0.75),
+        rgba(255,255,255,0.55)
+      );
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-      padding: 34px;
+      padding: 40px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
       animation: fade .25s ease;
     }
 
     @keyframes fade {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    .top-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .illustration {
+      font-size: 3.4rem;
+      color: var(--accent);
+      opacity: 0.85;
+      margin-bottom: 4px;
     }
 
     .kicker {
@@ -111,14 +128,8 @@
       opacity: 0.9;
     }
 
-    body.dark .kicker {
-      background: rgba(255,255,255,0.03);
-    }
-
-    .kicker i { color: var(--accent); }
-
     h1 {
-      margin: 16px 0 10px;
+      margin: 6px 0 0;
       font-size: clamp(2.2rem, 4vw, 3.4rem);
       font-weight: 800;
       letter-spacing: -0.02em;
@@ -126,7 +137,7 @@
     }
 
     .sub {
-      margin: 0 0 18px;
+      margin: 0 0 28px;
       color: var(--subtext);
       font-size: 1.1rem;
       line-height: 1.55;
@@ -134,17 +145,15 @@
     }
 
     .actions {
+      margin-top: 10px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 18px;
+      justify-content: center;
     }
 
-    /* Match iframe-control-btn feel (rounded, accent, lift) */
     .btn {
       border: none;
       border-radius: 12px;
-      padding: 12px 16px;
+      padding: 14px 20px;
       cursor: pointer;
       font-weight: 700;
       font-size: 1rem;
@@ -159,44 +168,48 @@
     .btn.primary {
       background: var(--accent);
       color: white;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.08);
     }
 
     .btn.primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 15px rgba(0,0,0,0.12);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(37,99,235,0.35);
     }
 
     .btn.primary:active {
       transform: scale(0.95);
     }
 
-    .details {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--glass-border);
-      color: var(--subtext);
-      font-size: 0.95rem;
-      word-break: break-word;
+    /* Inline code-style link */
+    .code-link {
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+      background: rgba(0, 0, 0, 0.06);
+      padding: 4px 6px;
+      border-radius: 6px;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid rgba(0,0,0,0.08);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
 
-    .details b {
-      color: var(--text);
-      font-weight: 700;
+    .code-link:hover {
+      background: rgba(0, 0, 0, 0.10);
+      border-color: rgba(0,0,0,0.18);
+    }
+
+    .spacer {
+      height: 24px;
     }
 
     @media (max-width: 720px) {
       .page { padding: 22px; }
-      .card-404 { padding: 22px; }
+      .card-404 { padding: 32px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .blob { animation: none; }
       .btn { transition: none; }
       .card-404 { animation: none; }
+      body { animation: none; }
     }
   </style>
 </head>
@@ -209,46 +222,50 @@
   </div>
 
   <main class="page">
-    <section class="card-404" aria-label="404 content">
-      <div class="kicker">
-        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
-        Error 404
-      </div>
+    <section class="card-404">
 
-      <h1>Page not found</h1>
-      <p class="sub">
-        That link doesn’t exist (or it moved). Use the button below to return to the portal.
-      </p>
+      <div class="top-group">
+        <div class="illustration">
+          <i class="fas fa-compass"></i>
+        </div>
+
+        <div class="kicker">
+          <i class="fas fa-triangle-exclamation"></i>
+          Error 404
+        </div>
+
+        <h1>Page not found</h1>
+        <p class="sub">
+          That link doesn’t exist (or it moved). Use the button below to return to the portal.
+        </p>
+      </div>
 
       <div class="actions">
         <a class="btn primary" href="index.html?login.live.com" id="homeBtn">
-          <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          <i class="fas fa-arrow-left"></i>
           Return Home
         </a>
       </div>
 
-      <div class="details">
-        <div><b>Path:</b> <span id="path"></span></div>
-        <div><b>Referrer:</b> <span id="ref">—</span></div>
-      </div>
+      <div class="spacer"></div>
+
+      <p class="sub">
+        If this is a recurring problem for you, please submit an issue ticket at<br><a href="https://github.com/celestrium-games/portal/issues" target="_blank" class="code-link">
+          https://github.com/celestrium-games/portal/issues
+        </a><br>and the Celestrium Online team will reach out to you when they are available.
+      </p>
+
     </section>
   </main>
 
   <script>
-    (function () {
-      const currentTheme = localStorage.getItem('celestrium-theme') || 'light';
-      document.body.className = currentTheme;
-      const fullPath = (location.pathname || "/") + (location.search || "") + (location.hash || "");
-      document.getElementById('path').textContent = fullPath;
-      document.getElementById('ref').textContent = document.referrer || '—';
-      const homeBtn = document.getElementById('homeBtn');
-      homeBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        const redirectUrl = 'https://celestrium-online-portal.vercel.app?login.live.com';
-        window.open(redirectUrl, '_blank');
-        window.close();
-      });
-    })();
+    const homeBtn = document.getElementById('homeBtn');
+    homeBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const redirectUrl = 'https://celestrium-online-portal.vercel.app?login.live.com';
+      window.open(redirectUrl, '_blank');
+      window.close();
+    });
   </script>
 </body>
 </html>
