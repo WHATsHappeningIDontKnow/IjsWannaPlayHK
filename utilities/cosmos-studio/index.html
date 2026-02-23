@@ -783,22 +783,65 @@
             {
                 name: 'README.txt',
                 type: 'txt',
-                path: '/', // Root
+                path: '/',
                 content: `COSMOS STUDIO
 ================================================================
-Updates:
-- Internal Drag & Drop (Move files/folders in sidebar)
-- Fixed folder creation prompts
-- Context-aware creation
+
+Welcome to your new lightweight, browser-based development environment.
+All data is persisted locally in your browser.
+
+[ KEYBOARD SHORTCUTS ]
+----------------------------------------------------------------
+  Ctrl/Cmd + F          Open Find & Replace / Jump to Line
+  Tab               Insert 4 spaces (soft tab)
+  Ctrl/Cmd + S          Force Save (Auto-save runs every 30s)
+
+[ SUPPORTED FILE TYPES ]
+----------------------------------------------------------------
+  [ CREATE & UPLOAD (Editable) ]
+  .html   HTML5       (Live Preview available)
+  .css    CSS3        (Syntax Highlighting)
+  .js     JavaScript  (Syntax Highlighting)
+  .json   JSON        (Auto-formatting available)
+  .py     Python3     (Client-side execution available)
+  .md     Markdown    (Live Preview available)
+  .txt    Plain Text  (Standard editing)
+
+  [ UPLOAD ONLY (Native Preview) ]
+  .png, .jpg, .ico    Images
+  .mp3, .wav          Audio
+  .mp4                Video
+  .pdf                PDF Documents
+
+[ LIMITATIONS ]
+----------------------------------------------------------------
+  • Upload Limit: 50 MB per file.
+
+[ FEATURES ]
+----------------------------------------------------------------
+  • Local Persistence: Refreshing won't lose your work.
+  • Folder Support: Organize files with folders and subfolders.
+  • Live Previews: Right-click HTML/MD files to render them.
+  • Python Terminal: Run Python code directly in the browser.
+  • Media Support: Upload and view images, audio, video, and PDFs.
+  • Minimap: Navigate large text files easily on the right.
+  • Import/Export: Drag & drop to import; Right-click to download.
 
 [ TIPS ]
 ----------------------------------------------------------------
-  1. Click the 'Folder +' icon to create a new folder.
-  2. Drag files into folders to move them.
-  3. Drag folders into other folders to nest them.
-` 
+  1. Drag and drop any supported file into the sidebar to open it.
+  2. Right-click any file in the sidebar for the Context Menu.
+  3. Use the 'Settings' gear icon to toggle Light/Dark themes.
+
+================================================================
+Happy Coding!
+-- The Celestrium Online Team
+
+================================================================
+Report bugs at: github.com/celestrium-games/portal/issues` 
             }
         ];
+        
 
         files.forEach(f => {
             if (!f.path) f.path = '/';
