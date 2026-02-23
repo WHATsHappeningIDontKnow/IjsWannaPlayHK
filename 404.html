@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Prevent indexing even if a misconfig causes a 200 somewhere -->
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="googlebot" content="noindex, nofollow, noarchive" />
+  <meta name="bingbot" content="noindex, nofollow, noarchive" />
+
+  <title>404 — Celestrium Online Portal</title>
+  <link rel="icon" type="image/x-icon" href="./assets/favicons/favicon.png?login.live.com" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: rgba(255, 255, 255, 0.7);
+      --text: #0f172a;
+      --accent: #2563eb;
+      --subtext: #64748b;
+      --glass-border: rgba(255, 255, 255, 0.5);
+    }
+
+    body.dark {
+      --bg: #0b0e14;
+      --card: rgba(20, 24, 33, 0.7);
+      --text: #f8fafc;
+      --subtext: #94a3b8;
+      --accent: #3b82f6;
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      background: var(--bg);
+      color: var(--text);
+      transition: background .3s ease, color .3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background blobs (same style as index.html) */
+    .bg-blobs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .blob {
+      position: absolute;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      filter: blur(80px);
+      opacity: 0.12;
+      animation: float 20s infinite alternate ease-in-out;
+    }
+
+    .blob.one { width: 560px; height: 560px; top: -190px; left: -170px; }
+    .blob.two { width: 520px; height: 520px; bottom: -230px; right: -160px; animation-duration: 24s; }
+    .blob.three { width: 420px; height: 420px; top: 22%; right: 18%; animation-duration: 28s; opacity: 0.10; }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(10%, 15%) scale(1.1); }
+    }
+
+    .page {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 64px;
+    }
+
+    .card-404 {
+      width: min(980px, 100%);
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      padding: 34px;
+      animation: fade .25s ease;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: rgba(0,0,0,0.02);
+      font-weight: 700;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    body.dark .kicker {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .kicker i { color: var(--accent); }
+
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+
+    .sub {
+      margin: 0 0 18px;
+      color: var(--subtext);
+      font-size: 1.1rem;
+      line-height: 1.55;
+      max-width: 75ch;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    /* Match iframe-control-btn feel (rounded, accent, lift) */
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.12);
+    }
+
+    .btn.primary:active {
+      transform: scale(0.95);
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--glass-border);
+      color: var(--subtext);
+      font-size: 0.95rem;
+      word-break: break-word;
+    }
+
+    .details b {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    @media (max-width: 720px) {
+      .page { padding: 22px; }
+      .card-404 { padding: 22px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blob { animation: none; }
+      .btn { transition: none; }
+      .card-404 { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-blobs" aria-hidden="true">
+    <div class="blob one"></div>
+    <div class="blob two"></div>
+    <div class="blob three"></div>
+  </div>
+
+  <main class="page">
+    <section class="card-404" aria-label="404 content">
+      <div class="kicker">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        Error 404
+      </div>
+
+      <h1>Page not found</h1>
+      <p class="sub">
+        That link doesn’t exist (or it moved). Use the button below to return to the portal.
+      </p>
+
+      <div class="actions">
+        <a class="btn primary" href="index.html?login.live.com" id="homeBtn">
+          <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          Return Home
+        </a>
+      </div>
+
+      <div class="details">
+        <div><b>Path:</b> <span id="path"></span></div>
+        <div><b>Referrer:</b> <span id="ref">—</span></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      // Apply saved theme (same storage key as index.html)
+      const currentTheme = localStorage.getItem('celestrium-theme') || 'light';
+      document.body.className = currentTheme;
+
+      // Set path + referrer
+      const fullPath = (location.pathname || "/") + (location.search || "") + (location.hash || "");
+      document.getElementById('path').textContent = fullPath;
+      document.getElementById('ref').textContent = document.referrer || '—';
+
+      // Ensure the link is exactly what you requested (and keep it relative)
+      const homeBtn = document.getElementById('homeBtn');
+      homeBtn.setAttribute('href', 'index.html?login.live.com');
+    })();
+  </script>
+</body>
+</html>
