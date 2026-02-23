@@ -159,7 +159,7 @@
         .folder-item { color: var(--text-muted); font-weight: 600; }
         .folder-item:hover, .file-item:hover { background: rgba(139, 148, 158, 0.05); }
         
-        /* Highlighted/Selected State (Last clicked) */
+        /* Highlighted/Selected State */
         .file-item.selected, .folder-item.selected { 
             background: var(--selection); 
             border-left-color: var(--accent);
@@ -509,7 +509,7 @@
         <div class="header-actions">
             <div id="save-status" style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; transition: opacity 0.3s;"></div>
             <button class="btn-icon" onclick="openSettings()" title="Settings">
-                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.87l-.75-2.6a.488.488 0 0 0-.47-.36H9.53a.488.488 0 0 0-.47.36l-.75 2.6c-.59.17-1.12.49-1.62.87l-2.39-.96a.488.488 0 0 0-.59.22L1.79 10.5a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32a.488.488 0 0 0 .59.22l2.39-.96c.5.38 1.03.7 1.62.87l.75 2.6c.05.2.24.36.47.36h4.94c.23 0 .42-.16.47-.36l.75-2.6c.59-.17 1.12-.49 1.62-.87l2.39.96a.488.488 0 0 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
             </button>
         </div>
     </header>
@@ -774,7 +774,7 @@
                 localStorage.removeItem(STORAGE_KEY);
                 localStorage.removeItem(FOLDERS_KEY);
                 localStorage.removeItem(COLLAPSED_KEY);
-                window.location.replace(window.location.pathname);
+                location.reload();
             }
         }
 
@@ -783,7 +783,7 @@
             {
                 name: 'README.txt',
                 type: 'txt',
-                path: '/',
+                path: '/', // Root
                 content: `COSMOS STUDIO
 ================================================================
 
@@ -820,7 +820,7 @@ All data is persisted locally in your browser.
 [ FEATURES ]
 ----------------------------------------------------------------
   • Local Persistence: Refreshing won't lose your work.
-  • Folder Support: Organize files with folders and subfolders.
+  • Folder Support: Organize files with nested folders in the sidebar.
   • Live Previews: Right-click HTML/MD files to render them.
   • Python Terminal: Run Python code directly in the browser.
   • Media Support: Upload and view images, audio, video, and PDFs.
@@ -838,10 +838,9 @@ Happy Coding!
 -- The Celestrium Online Team
 
 ================================================================
-Report bugs at: github.com/celestrium-games/portal/issues` 
+Report bugs at: github.com/celestrium-games/portal/issues`
             }
         ];
-        
 
         files.forEach(f => {
             if (!f.path) f.path = '/';
@@ -898,13 +897,21 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             return true;
         }
 
+        function loadLib(id, url, callback) {
+            if (document.getElementById(id)) { callback(); return; }
+            const script = document.createElement('script');
+            script.id = id;
+            script.src = url;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
         // --- DRAG & DROP LOGIC ---
 
         function handleDragStart(e, type, path, index) {
             draggedItem = { type, path, index };
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', JSON.stringify(draggedItem));
-            // Slight delay to allow visual drag image to generate
             setTimeout(() => e.target.style.opacity = '0.5', 0);
         }
 
@@ -915,21 +922,16 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             sidebar.classList.remove('dragover');
         }
 
-        // Helper to find drop target from event
         function getDropTarget(e) {
             const target = e.target.closest('.folder-item');
             if (target) {
                 return target.dataset.path; // Dropped on a folder
             }
-            // If dropping on file item, logic depends on requirements. 
-            // Typically dropping on a file does nothing or moves to sibling.
-            // Here, we'll enforce dropping ON FOLDERS or SIDEBAR (Root).
             return '/'; 
         }
 
         sidebar.ondragover = (e) => { 
             e.preventDefault(); 
-            // Visual feedback
             const folderEl = e.target.closest('.folder-item');
             document.querySelectorAll('.drag-target').forEach(el => el.classList.remove('drag-target'));
             
@@ -947,13 +949,10 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             
             const targetPath = getDropTarget(e);
 
-            // CASE 1: Internal Drag & Drop (Moving existing items)
             if (draggedItem) {
                 if (draggedItem.type === 'file') {
-                    // Move File
                     const file = files[draggedItem.index];
                     if (file.path !== targetPath) {
-                        // Check for duplicate name in target
                         if (files.some(f => f.name === file.name && f.path === targetPath)) {
                             showToast("File with same name exists in destination.", "error");
                         } else {
@@ -963,26 +962,19 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                         }
                     }
                 } else if (draggedItem.type === 'folder') {
-                    // Move Folder
                     const oldPath = draggedItem.path;
-                    
-                    // Prevent moving folder into itself or its children
                     if (targetPath.startsWith(oldPath)) {
                         showToast("Cannot move folder into itself.", "error");
                         return;
                     }
-                    
-                    // Calculate new prefix
                     const folderName = oldPath.split('/').filter(p=>p).pop();
                     const newPath = targetPath + folderName + '/';
 
-                    // Check if destination already has this folder
                     if (folders.includes(newPath)) {
                         showToast("Folder already exists in destination.", "error");
                         return;
                     }
 
-                    // Update all subfolders
                     folders = folders.map(f => {
                         if (f.startsWith(oldPath)) {
                             return newPath + f.substring(oldPath.length);
@@ -990,7 +982,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                         return f;
                     });
 
-                    // Update all files inside
                     files.forEach(f => {
                         if (f.path.startsWith(oldPath)) {
                             f.path = newPath + f.path.substring(oldPath.length);
@@ -1003,7 +994,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 return;
             }
 
-            // CASE 2: External Drag & Drop (Desktop files)
             const items = e.dataTransfer.items;
             if (items) {
                 for (let i = 0; i < items.length; i++) {
@@ -1013,7 +1003,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                     }
                 }
             } else {
-                // Fallback
                 Array.from(e.dataTransfer.files).forEach(file => processFile(file, targetPath));
             }
             saveToLocal();
@@ -1067,8 +1056,6 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
                 localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed));
 
-                if (!isAuto) render();
-
                 const status = document.getElementById('save-status');
                 if(status) {
                     if (saveTimeout) clearTimeout(saveTimeout);
@@ -1111,7 +1098,7 @@ Report bugs at: github.com/celestrium-games/portal/issues`
 
         function getIcon(type) {
             if(type === 'py') {
-                 const pySvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 83.371017 101.00108" width="16" height="16"><path fill="url(#lg1)" d="M54.92 0c-4.58.02-8.96.41-12.81 1.1-11.35 2-11.51 11.57-11.51 11.57h23.77c2.61 0 4.95 2.11 4.95 4.97v13.56H22.95s-12.78-1.55-15.02 12.01c-1.89 11.45 9.77 14.15 9.77 14.15h6.63v-4.48c0-5.75 4.58-10.74 10.74-10.74h17.96v-5.91c0-5.94-5.06-11.02-10.84-11.02H18.52S.44 23.46 2.44 54.68c1.69 26.37 25.5 25.66 25.5 25.66H46.1v-6.68c0-5.94 5.25-10.96 11.1-10.96h23.71s1.39-12.78-12.33-14.77c-11.23-1.63-13.68 9.77-13.68 9.77v4.48h6.69s11.66 2.44 9.77 14.21c-2.25 14.03-15.02 12.01-15.02 12.01H36.37v12.56c0 2.86 2.34 5.3 4.95 5.3h23.77s-.16 9.57-11.51 11.57c-3.85.69-8.23 1.08-12.81 1.1h32.61c28.31 0 28.31-28.31 28.31-28.31V28.31C101.68 0 73.37 0 73.37 0h-18.45z"/><defs><linearGradient id="lg1" x1="16.52" y1="16.92" x2="68.08" y2="82.91" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#3776ab"/><stop offset="1" stop-color="#ffd343"/></linearGradient></defs></svg>`;
+                 const pySvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 83.371017 101.00108" width="16" height="16"><path fill="url(#lg1)" d="M54.92 0c-4.58.02-8.96.41-12.81 1.1-11.35 2-13.41 7.2-13.41 14.93v10.22h26.81v3.4h-26.8-10.06c-7.8 0-14.62 4.68-16.75 13.6-2.46 10.2-2.57 16.58 0 27.24 1.9 7.94 6.45 13.6 14.25 13.6h9.22v-12.26c0-8.85 7.66-16.66 16.75-16.66h26.78c7.45 0 13.4-6.14 13.4-13.62V26.02c0-7.27-6.13-12.73-13.4-13.94C64.28.33 59.5-.02 54.92 0zm-14.5 8.22c2.77 0 5.03 2.3 5.03 5.12 0 2.82-2.26 5.1-5.03 5.1-2.78 0-5.03-2.28-5.03-5.1 0-2.82 2.25-5.12 5.03-5.12z"/><path fill="url(#lg2)" d="M85.64 28.66v11.9c0 9.24-7.83 17-16.75 17H42.1c-7.33 0-13.4 6.28-13.4 13.63v25.53c0 7.27 6.32 11.54 13.4 13.63 8.49 2.5 16.63 2.94 26.79 0 6.75-1.96 13.4-5.89 13.4-13.63V86.5h-26.78v-3.4h26.78 13.4c7.8 0 10.7-5.44 13.4-13.6 2.8-8.4 2.68-16.47 0-27.24-1.92-7.76-5.6-13.6-13.4-13.6zm-15.06 64.66c2.78 0 5.03 2.27 5.03 5.1 0 2.82-2.25 5.12-5.03 5.12-2.77 0-5.03-2.3-5.03-5.12 0-2.82 2.26-5.1 5.03-5.1z"/><defs><linearGradient id="lg1" x1="26.65" y1="20.6" x2="135.67" y2="114.4" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.56254 0 0 .56797 -14.99 -11.7)"><stop offset="0" stop-color="#5a9fd4"/><stop offset="1" stop-color="#306998"/></linearGradient><linearGradient id="lg2" x1="150.96" y1="192.35" x2="112.03" y2="137.27" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.56254 0 0 .56797 -14.99 -11.7)"><stop offset="0" stop-color="#ffd43b"/><stop offset="1" stop-color="#ffe873"/></linearGradient></defs></svg>`;
                  return `<span class="icon icon-py-svg">${pySvg}</span>`;
             }
             
@@ -1665,51 +1652,128 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         function handleInput(val) {
             if (activeIdx !== -1) {
                 files[activeIdx].content = val;
-                updateHighlight();
+                
+                // Old Highlighting Logic Restored
+                const type = files[activeIdx].type;
+                const langMap = {
+                    'html': 'xml', 'css': 'css', 'js': 'javascript', 'json': 'json', 'py': 'python',
+                    'md': 'markdown', 'txt': 'plaintext'
+                };
+                const lang = langMap[type] || 'plaintext';
+                
+                let highlightedHTML = "";
+                if (val.trim() === "") {
+                    highlightedHTML = "";
+                } else {
+                    try {
+                        highlightedHTML = hljs.highlight(val, { language: lang }).value;
+                    } catch (e) {
+                        highlightedHTML = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    }
+                }
+                
+                hl.innerHTML = highlightedHTML + "\n";
+                minimapContent.innerText = val;
                 updateGutter();
             }
         }
 
         function updateHighlight() {
-            if (activeIdx === -1) return;
-            let code = textarea.value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            try {
-                const res = hljs.highlightAuto(textarea.value);
-                hl.innerHTML = res.value + "<br>"; 
-            } catch(e) {
-                hl.innerHTML = code + "<br>";
-            }
-            updateMinimap();
+            // Triggered by handleInput usually, but called on load
+            handleInput(textarea.value);
         }
 
         function updateGutter() {
-            const lines = textarea.value.split('\n').length;
-            gutter.innerHTML = Array(lines).fill(0).map((_, i) => i + 1).join('<br>');
-        }
+            if(gutter.style.display === 'none') return;
 
-        function sync() {
-            const top = editorScroll.scrollTop;
-            const left = editorScroll.scrollLeft;
-            const ratio = editorScroll.clientHeight / editorScroll.scrollHeight;
-            const viewHeight = minimap.clientHeight * ratio;
-            const viewTop = (top / editorScroll.scrollHeight) * minimap.clientHeight;
-            
-            minimapViewport.style.height = viewHeight + 'px';
-            minimapViewport.style.top = viewTop + 'px';
-            minimapViewport.style.display = ratio >= 1 ? 'none' : 'block';
-        }
-
-        function updateMinimap() {
-            minimapContent.innerText = textarea.value;
+            const lines = textarea.value.split('\n');
+            const measure = document.createElement('div');
+            const isNoWrap = document.getElementById('scroll').classList.contains('no-wrap');
+            const wrapStyle = isNoWrap ? 
+                'white-space: pre !important; word-wrap: normal !important;' : 
+                'white-space: pre-wrap; word-wrap: break-word;';
+                
+                measure.style.cssText = `position: absolute; visibility: hidden; top: -9999px; left: -9999px; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; ${wrapStyle}`;
+            document.body.appendChild(measure);
+            let gutterHTML = "";
+            lines.forEach((lineText, i) => {
+                measure.textContent = lineText || " ";
+                const height = measure.clientHeight;
+                const lineCount = Math.round(height / 21);
+                gutterHTML += `<span>${i + 1}</span><br>`;
+                for(let j = 1; j < lineCount; j++) gutterHTML += `<span style="visibility:hidden">.</span><br>`;
+            });
+            gutter.innerHTML = gutterHTML;
+            document.body.removeChild(measure);
             sync();
         }
 
         function checkTab(e) {
             if(e.key === 'Tab') {
                 e.preventDefault();
-                document.execCommand('insertText', false, '    ');
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                textarea.value = textarea.value.substring(0, start) + "\t" + textarea.value.substring(end);
+                textarea.selectionStart = textarea.selectionEnd = start + 1;
+                handleInput(textarea.value);
             }
         }
+
+        // --- OLD SCROLL SYNC & MINIMAP LOGIC ---
+        const SCALE = 0.15;
+
+        function sync() { 
+            const scroller = document.getElementById('scroll');
+            if(scroller.style.display === 'none') return;
+
+            document.getElementById('gutter').scrollTop = scroller.scrollTop; 
+            
+            const scrollPercent = scroller.scrollTop / scroller.scrollHeight;
+            const viewportHeight = scroller.clientHeight;
+            
+            let mapViewportHeight = viewportHeight * SCALE;
+            if(mapViewportHeight < 20) mapViewportHeight = 20;
+
+            let topPos = scroller.scrollTop * SCALE;
+            minimapViewport.style.height = mapViewportHeight + 'px';
+            minimapViewport.style.top = topPos + 'px';
+            
+            if(minimapContent.clientHeight * SCALE > minimap.clientHeight) {
+               const mapScrollMax = (minimapContent.clientHeight * SCALE) - minimap.clientHeight;
+               const mainScrollMax = scroller.scrollHeight - scroller.clientHeight;
+               if(mainScrollMax > 0) {
+                   const ratio = scroller.scrollTop / mainScrollMax;
+                   minimapContent.style.top = `-${ratio * mapScrollMax}px`;
+                   minimapViewport.style.top = `${(scroller.scrollTop * SCALE) - (ratio * mapScrollMax)}px`;
+               }
+            } else {
+                minimapContent.style.top = '0px';
+                minimapViewport.style.top = (scroller.scrollTop * SCALE) + 'px';
+            }
+        }
+
+        let isDraggingMap = false;
+
+        minimap.addEventListener('mousedown', (e) => { isDraggingMap = true; moveMinimap(e); });
+        window.addEventListener('mouseup', () => { isDraggingMap = false; });
+        window.addEventListener('mousemove', (e) => { if(isDraggingMap) { e.preventDefault(); moveMinimap(e); } });
+
+        function moveMinimap(e) {
+            const rect = minimap.getBoundingClientRect();
+            const clickY = e.clientY - rect.top;
+            const scroller = document.getElementById('scroll');
+            
+            if(minimapContent.clientHeight * SCALE <= minimap.clientHeight) {
+                const targetScroll = (clickY / SCALE) - (scroller.clientHeight / 2); 
+                scroller.scrollTop = targetScroll;
+            } else {
+                const percent = clickY / minimap.clientHeight;
+                const targetScroll = percent * (scroller.scrollHeight - scroller.clientHeight);
+                 scroller.scrollTop = targetScroll;
+            }
+        }
+
+        window.addEventListener('resize', updateGutter);
 
         // --- FIND & REPLACE ---
         
@@ -1717,91 +1781,93 @@ Report bugs at: github.com/celestrium-games/portal/issues`
             const term = document.getElementById('find-input').value;
             if(!term) return;
             const text = textarea.value;
-            const start = textarea.selectionEnd;
-            const idx = text.indexOf(term, start);
-            if (idx !== -1) {
-                textarea.setSelectionRange(idx, idx + term.length);
-                textarea.blur(); textarea.focus(); 
-            } else {
-                const idx2 = text.indexOf(term, 0);
-                if (idx2 !== -1) {
-                    textarea.setSelectionRange(idx2, idx2 + term.length);
-                    textarea.blur(); textarea.focus();
-                } else {
-                    showToast("No match found.");
-                }
-            }
+            let startPos = textarea.selectionEnd;
+            let index = text.indexOf(term, startPos);
+            if(index === -1) index = text.indexOf(term, 0);
+            
+            if(index !== -1) {
+                textarea.focus();
+                textarea.setSelectionRange(index, index + term.length);
+                const lines = text.substr(0, index).split('\n');
+                const lineNum = lines.length;
+                const lineHeight = 21;
+                document.getElementById('scroll').scrollTop = (lineNum - 5) * lineHeight; 
+            } else { showToast("No matches found"); }
         }
-        
+
         function replaceOne() {
             const term = document.getElementById('find-input').value;
             const rep = document.getElementById('replace-input').value;
-            if(!term) return;
-            const text = textarea.value;
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
-            const selected = text.substring(start, end);
+            const selectedText = textarea.value.substring(start, end);
             
-            if (selected === term) {
-                document.execCommand('insertText', false, rep);
+            if(selectedText === term) {
+                const text = textarea.value;
+                const newText = text.substring(0, start) + rep + text.substring(end);
+                textarea.value = newText;
+                handleInput(newText);
+                textarea.setSelectionRange(start, start + rep.length);
                 findNext();
-                handleInput(textarea.value);
-            } else {
-                findNext();
-            }
+            } else { findNext(); }
         }
-        
+
         function replaceAll() {
             const term = document.getElementById('find-input').value;
             const rep = document.getElementById('replace-input').value;
             if(!term) return;
             const text = textarea.value;
             const newText = text.split(term).join(rep);
-            if (text !== newText) {
+            if(text !== newText) {
                 textarea.value = newText;
                 handleInput(newText);
-                showToast("Replaced all occurrences.");
-            }
+                showToast("Replaced all occurrences");
+            } else { showToast("Nothing to replace"); }
         }
 
         function closeFind() { document.getElementById('find-widget').style.display = 'none'; }
 
         function gotoLine() {
-            const line = parseInt(document.getElementById('goto-input').value);
-            if(!line) return;
+            const num = parseInt(document.getElementById('goto-input').value);
+            if(!num) return;
             const lines = textarea.value.split('\n');
-            if (line < 1 || line > lines.length) return;
-            
-            let pos = 0;
-            for(let i=0; i<line-1; i++) pos += lines[i].length + 1; 
-            
-            textarea.setSelectionRange(pos, pos);
-            textarea.blur(); textarea.focus();
-            const lineHeight = 21; 
-            editorScroll.scrollTop = (line - 1) * lineHeight - (editorScroll.clientHeight / 2);
+            if(num < 1 || num > lines.length) { showToast(`Line ${num} not found`, 'error'); return; }
+            let charPos = 0;
+            for(let i=0; i < num-1; i++) charPos += lines[i].length + 1;
+            textarea.focus();
+            textarea.setSelectionRange(charPos, charPos);
+            const lineHeight = 21;
+            document.getElementById('scroll').scrollTop = (num - 10) * lineHeight;
         }
+
+        // --- FEATURES ---
 
         function runPreview() {
             const f = files[rightClickIdx];
-            const win = window.open("", "_blank");
-            win.document.write(f.content);
-            win.document.close();
+            const win = window.open('about:blank', '_blank');
+            if(!win) {
+                showToast("Pop-up blocked! Allow pop-ups to run code.", "error");
+                return;
+            }
+            win.document.write(`<title>HTML Preview: ${f.name}</title>` + f.content); win.document.close();
         }
         
         function previewMarkdown() {
             const f = files[rightClickIdx];
-            let html = f.content
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
-                .replace(/\*(.*)\*/gim, '<i>$1</i>')
-                .replace(/`(.*)`/gim, '<code>$1</code>')
-                .replace(/\n/gim, '<br>');
-            
-            const win = window.open("", "_blank");
-            win.document.write('<style>body{font-family:sans-serif;padding:20px;}</style>' + html);
-            win.document.close();
+            loadLib('marked-lib', 'https://cdn.jsdelivr.net/npm/marked/marked.min.js', () => {
+                const html = marked.parse(f.content);
+                const win = window.open('about:blank', '_blank');
+                if(!win) {
+                    showToast("Pop-up blocked! Allow pop-ups to run code.", "error");
+                    return;
+                }
+                win.document.write(`
+                    <html><head><title>Markdown Preview: ${f.name}</title>
+                    <style>body{font-family:system-ui;padding:20px;max-width:800px;margin:0 auto;}</style>
+                    </head><body>${html}</body></html>
+                `);
+                win.document.close();
+            });
         }
 
         function beautifyJSON() {
@@ -1809,8 +1875,12 @@ Report bugs at: github.com/celestrium-games/portal/issues`
                 const f = files[rightClickIdx];
                 const obj = JSON.parse(f.content);
                 f.content = JSON.stringify(obj, null, 4);
-                if(activeIdx === rightClickIdx) textarea.value = f.content;
+                if(activeIdx === rightClickIdx) {
+                    textarea.value = f.content;
+                    handleInput(f.content);
+                }
                 saveToLocal();
+                showToast("JSON Formatted");
             } catch(e) {
                 showToast("Invalid JSON", "error");
             }
@@ -1818,19 +1888,68 @@ Report bugs at: github.com/celestrium-games/portal/issues`
         
         function executePython() {
             const f = files[rightClickIdx];
-            const lines = f.content.split('\n');
-            let output = ">> EXECUTING PYTHON (Simulation)...\n";
-            
-            lines.forEach(l => {
-                const printMatch = l.match(/print\s*\((.*)\)/);
-                if(printMatch) {
-                    let content = printMatch[1].replace(/["']/g, "");
-                    output += content + "\n";
-                }
-            });
-            alert(output);
+            const win = window.open('about:blank', '_blank');
+            if(!win) {
+                showToast("Pop-up blocked! Allow pop-ups to run code.", "error");
+                return;
+            }
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Python Terminal: ${f.name}</title>
+                    <style>
+                        body { background: #0d1117; color: #c9d1d9; font-family: 'Consolas', monospace; padding: 20px; margin: 0; }
+                        #output { white-space: pre-wrap; word-wrap: break-word; }
+                        .error { color: #f85149; }
+                        .status { color: #8b949e; font-style: italic; margin-bottom: 10px; border-bottom: 1px solid #30363d; padding-bottom: 10px; display:block; }
+                    </style>
+                    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"><\/script>
+                    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"><\/script>
+                </head>
+                <body>
+                    <span class="status" id="status">Initializing Environment...</span>
+                    <div id="output"></div>
+                    <script>
+                        const code = ${JSON.stringify(f.content)};
+                        const statusEl = document.getElementById('status');
+                        const outputEl = document.getElementById('output');
+
+                        function outf(text) { 
+                            outputEl.innerText += text; 
+                        }
+                        
+                        function builtinRead(x) {
+                            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                                throw "File not found: '" + x + "'";
+                            return Sk.builtinFiles["files"][x];
+                        }
+
+                        window.onload = function() {
+                            statusEl.innerText = "Running...";
+                            Sk.pre = "output";
+                            Sk.configure({ output: outf, read: builtinRead });
+
+                            Sk.misceval.asyncToPromise(function() {
+                                return Sk.importMainWithBody("<stdin>", false, code, true);
+                            }).then(function() {
+                                statusEl.innerText = "Program Finished";
+                            }, function(err) {
+                                statusEl.innerText = "Execution Error";
+                                const errDiv = document.createElement('div');
+                                errDiv.className = 'error';
+                                errDiv.innerText = "\\n" + err.toString();
+                                outputEl.appendChild(errDiv);
+                            });
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
         }
 
+        // --- INIT ---
         render();
 
     </script>
