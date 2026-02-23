@@ -38,6 +38,7 @@ const games = [
     {name:"Duck Life 5", url:"./games/duck-life-5/", category:"adventure"},
     {name:"Eaglercraft", url:"./games/eaglercraft/", category:"other"},
     {name:"Escape Road", url:"./games/escape-road/", category:"action"},
+    {name:"Escape Road 2", url:"./games/escape-road-2/", category:"action"},
     {name:"Fancy Pants Adventures", url:"./games/fancy-pants-adventures/", category:"platformer"},
     {name:"Fireboy and Watergirl 3", url:"./games/fireboy-and-watergirl-3/", category:"platformer"},
     {name:"Five Nights at Freddy's 4", url:"./games/five-nights-at-freddys-4/", category:"action"},
