@@ -159,12 +159,15 @@
         .tab-close { margin-left: auto; font-size: 14px; padding: 2px 6px; border-radius: 4px; }
         .tab-close:hover { color: var(--hl-attr); }
 
-        .icon { width: 16px; text-align: center; font-family: monospace; font-size: 9px; font-weight: bold; }
+        .icon { width: 16px; text-align: center; font-family: monospace; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .icon-html { color: #e34f26; }
         .icon-css { color: #58a6ff; }
         .icon-js { color: #f7df1e; }
         .icon-txt { color: #8b949e; }
         .icon-json { color: #d29922; }
+        .icon-md { color: #58a6ff; }
+        
+        .icon-py-svg { width: 16px; height: 16px; }
 
         #editor-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .editor-container { display: flex; flex: 1; position: relative; overflow: hidden; }
@@ -177,6 +180,15 @@
         }
 
         .editor-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; position: relative; }
+        
+        /* NO WRAP MODE STYLES */
+        .editor-scroll.no-wrap { overflow-x: auto; }
+        .editor-scroll.no-wrap #editing, 
+        .editor-scroll.no-wrap #highlighting {
+            white-space: pre !important;
+            word-wrap: normal !important;
+            overflow-wrap: normal !important;
+        }
 
         .editor-wrap { 
             display: grid; 
@@ -316,7 +328,7 @@
         .menu-item svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
 
         #modal-overlay, #settings-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 3000; align-items: flex-start; justify-content: center; padding-top: 100px; }
-        .modal { background: var(--bg-status); border: 1px solid var(--border); padding: 24px; border-radius: 10px; width: 450px; color: var(--text-main); max-height: 80vh; overflow-y: auto; }
+        .modal { background: var(--bg-status); border: 1px solid var(--border); padding: 24px; border-radius: 10px; width: 450px; color: var(--text-main); max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column; }
         .modal-types-info { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block; }
         .modal input, .modal select { 
             background: var(--bg-editor); border: 1px solid var(--border); color: var(--text-main); padding: 10px; width: 100%; border-radius: 4px; margin: 5px 0 15px 0; 
@@ -328,6 +340,41 @@
         .settings-section { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         .settings-section:last-child { border-bottom: none; }
         .settings-header { font-size: 14px; font-weight: bold; margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+
+        /* Toggle Switch Styling */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .setting-row span { font-size: 13px; color: var(--text-main); font-weight: 500; }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent); }
+        input:focus + .slider { box-shadow: 0 0 1px var(--accent); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
 
         /* Toast Notifications Styles */
         #toast-container { position: fixed; bottom: 40px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
@@ -409,13 +456,19 @@
     </div>
 
     <footer>
-        <div id="status-left">Ready. Valid formats: .html, .css, .js, .txt, .json</div>
+        <div id="status-left">Ready.</div>
         <div id="auto-save-timer">Sync: 30s</div>
     </footer>
 
     <div id="context-menu">
         <div class="menu-item" id="menu-run" onclick="runPreview()">
             <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg> Preview HTML
+        </div>
+        <div class="menu-item" id="menu-run-py" style="display:none;" onclick="executePython()">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 18V6h16v12H4zM8 8l5 4-5 4V8z"/></svg> Execute Program
+        </div>
+        <div class="menu-item" id="menu-preview-md" style="display:none;" onclick="previewMarkdown()">
+             <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> Preview Markdown
         </div>
         <div class="menu-item" onclick="prepRename()">
             <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Rename
@@ -438,7 +491,7 @@
     <div id="modal-overlay">
         <div class="modal">
             <h3 id="modal-title" style="margin:0; font-size:14px; margin-bottom: 8px;">New File</h3>
-            <span class="modal-types-info">Allowed: .html, .css, .js, .txt, .json</span>
+            <span class="modal-types-info">Allowed: .html, .css, .js, .txt, .json, .py, .md</span>
             <input type="text" id="modal-input" placeholder="filename.filetype">
             <div class="modal-btns">
                 <button onclick="closeModal()">Cancel</button>
@@ -471,6 +524,14 @@
                     <option value="hybrid">Hybrid</option>
                     <option value="stackoverflow">Stack Overflow</option>
                 </select>
+
+                <div class="setting-row">
+                    <span>Line Wrap</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="line-wrap-check" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
 
             <div class="settings-section">
@@ -493,25 +554,33 @@
             </div>
         </div>
     </div>
-
+    
     <div id="toast-container"></div>
 
     <script>
         const STORAGE_KEY = 'cosmos_studio_project';
         const PREFS_KEY = 'cosmos_studio_prefs';
-        const VALID_EXT = ['html', 'css', 'js', 'txt', 'json'];
+        const VALID_EXT = ['html', 'css', 'js', 'txt', 'json', 'py', 'md'];
 
         // Syntax Theme URLs - Logic handled in applyLoadedPrefs
         const SYNTAX_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/';
 
         // Load Preferences
-        let prefs = JSON.parse(localStorage.getItem(PREFS_KEY)) || { ui: 'dark', syntax: 'atom' };
+        let prefs = JSON.parse(localStorage.getItem(PREFS_KEY)) || { ui: 'dark', syntax: 'atom', lineWrap: true };
         
         function applyLoadedPrefs() {
             // Apply UI Theme
             if(prefs.ui === 'light') document.body.classList.add('light-theme');
             else document.body.classList.remove('light-theme');
             
+            // Apply Line Wrap
+            const scrollContainer = document.getElementById('scroll');
+            if (prefs.lineWrap === false) { // Explicit check as it defaults to true
+                scrollContainer.classList.add('no-wrap');
+            } else {
+                scrollContainer.classList.remove('no-wrap');
+            }
+
             // Apply Syntax Theme based on logic
             const link = document.getElementById('highlight-theme');
             let themeFile = 'hybrid.min.css';
@@ -531,6 +600,8 @@
             }
 
             link.href = SYNTAX_BASE + themeFile;
+            // Force update to handle wrap changes affecting height/gutter
+            setTimeout(updateGutter, 50);
         }
         applyLoadedPrefs();
 
@@ -538,6 +609,7 @@
         function openSettings() {
             document.getElementById('ui-theme-select').value = prefs.ui;
             document.getElementById('syntax-theme-select').value = prefs.syntax;
+            document.getElementById('line-wrap-check').checked = (prefs.lineWrap !== false);
             document.getElementById('settings-overlay').style.display = 'flex';
         }
 
@@ -548,8 +620,9 @@
         function applySettings() {
             const ui = document.getElementById('ui-theme-select').value;
             const syntax = document.getElementById('syntax-theme-select').value;
+            const lineWrap = document.getElementById('line-wrap-check').checked;
             
-            prefs = { ui, syntax };
+            prefs = { ui, syntax, lineWrap };
             localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
             
             applyLoadedPrefs();
@@ -576,10 +649,14 @@ Your lightweight, browser-based coding environment.
     - .css   (Full syntax highlighting)
     - .js    (Full syntax highlighting)
     - .json  (Syntax highlighting + Beautifier)
+    - .py    (Python syntax + Execution via Skulpt)
+    - .md    (Markdown syntax + Preview)
     - .txt   (Plain text editing)
 
 3. AVAILABLE FUNCTIONS (Right-click a file in the sidebar)
     - PREVIEW HTML: Opens your HTML code in a new window to see it live.
+    - EXECUTE PROGRAM: (Python Only) Runs your Python code in a secure external terminal window.
+    - PREVIEW MARKDOWN: Renders your Markdown file in a new window.
     - BEAUTIFY JSON: Instantly formats messy JSON strings into readable code.
     - RENAME: Safely change filenames (prevents duplicates and invalid types).
     - DUPLICATE: Creates a copy of your file instantly.
@@ -680,8 +757,11 @@ Happy Coding!
         function triggerContextMenu(e, index) {
             e.preventDefault(); e.stopPropagation();
             rightClickIdx = index;
-            document.getElementById('menu-run').style.display = files[rightClickIdx].type === 'html' ? 'flex' : 'none';
-            document.getElementById('menu-json').style.display = files[rightClickIdx].type === 'json' ? 'flex' : 'none';
+            const type = files[rightClickIdx].type;
+            document.getElementById('menu-run').style.display = type === 'html' ? 'flex' : 'none';
+            document.getElementById('menu-run-py').style.display = type === 'py' ? 'flex' : 'none';
+            document.getElementById('menu-preview-md').style.display = type === 'md' ? 'flex' : 'none';
+            document.getElementById('menu-json').style.display = type === 'json' ? 'flex' : 'none';
             document.getElementById('menu-del').style.display = files.length > 1 ? 'flex' : 'none';
             const menu = document.getElementById('context-menu');
             menu.style.display = 'block'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px';
@@ -698,7 +778,21 @@ Happy Coding!
         window.addEventListener('click', () => { document.getElementById('context-menu').style.display = 'none'; });
 
         function getIcon(type) {
-            const icons = { html: '&lt;&gt;', css: '#', js: 'JS', txt: 'TXT', json: '{ }' };
+            if(type === 'py') {
+                 // Using the requested SVG code as a Data URI for the Python icon
+                 const pySvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 83.371017 101.00108" width="16" height="16"><path fill="url(#lg1)" d="M54.92 0c-4.58.02-8.96.41-12.81 1.1-11.35 2-13.41 7.2-13.41 14.93v10.22h26.81v3.4h-26.8-10.06c-7.8 0-14.62 4.68-16.75 13.6-2.46 10.2-2.57 16.58 0 27.24 1.9 7.94 6.45 13.6 14.25 13.6h9.22v-12.26c0-8.85 7.66-16.66 16.75-16.66h26.78c7.45 0 13.4-6.14 13.4-13.62V26.02c0-7.27-6.13-12.73-13.4-13.94C64.28.33 59.5-.02 54.92 0zm-14.5 8.22c2.77 0 5.03 2.3 5.03 5.12 0 2.82-2.26 5.1-5.03 5.1-2.78 0-5.03-2.28-5.03-5.1 0-2.82 2.25-5.12 5.03-5.12z"/><path fill="url(#lg2)" d="M85.64 28.66v11.9c0 9.24-7.83 17-16.75 17H42.1c-7.33 0-13.4 6.28-13.4 13.63v25.53c0 7.27 6.32 11.54 13.4 13.63 8.49 2.5 16.63 2.94 26.79 0 6.75-1.96 13.4-5.89 13.4-13.63V86.5h-26.78v-3.4h26.78 13.4c7.8 0 10.7-5.44 13.4-13.6 2.8-8.4 2.68-16.47 0-27.24-1.92-7.76-5.6-13.6-13.4-13.6zm-15.06 64.66c2.78 0 5.03 2.27 5.03 5.1 0 2.82-2.25 5.12-5.03 5.12-2.77 0-5.03-2.3-5.03-5.12 0-2.82 2.26-5.1 5.03-5.1z"/><defs><linearGradient id="lg1" x1="26.65" y1="20.6" x2="135.67" y2="114.4" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.56254 0 0 .56797 -14.99 -11.7)"><stop offset="0" stop-color="#5a9fd4"/><stop offset="1" stop-color="#306998"/></linearGradient><linearGradient id="lg2" x1="150.96" y1="192.35" x2="112.03" y2="137.27" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.56254 0 0 .56797 -14.99 -11.7)"><stop offset="0" stop-color="#ffd43b"/><stop offset="1" stop-color="#ffe873"/></linearGradient></defs></svg>`;
+                 return `<span class="icon icon-py-svg">${pySvg}</span>`;
+            }
+            
+            const icons = { 
+                html: '&lt;&gt;', 
+                css: '#', 
+                js: 'JS', 
+                txt: 'TXT', 
+                json: '{ }',
+                md: 'M&darr;'
+            };
+            
             return `<span class="icon icon-${type}">${icons[type] || '•'}</span>`;
         }
 
@@ -788,7 +882,103 @@ Happy Coding!
         function runPreview() {
             const f = files[rightClickIdx];
             const win = window.open('about:blank', '_blank');
-            win.document.write(f.content); win.document.close();
+            win.document.write(`<title>HTML Preview: ${f.name}</title>` + f.content); win.document.close();
+        }
+
+        // --- EXECUTIONS & PREVIEWS ---
+        
+        // Helper to load libraries dynamically
+        function loadLib(id, url, callback) {
+            if (document.getElementById(id)) { callback(); return; }
+            const script = document.createElement('script');
+            script.id = id;
+            script.src = url;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
+        // PYTHON EXECUTION (SKULPT) - EXTERNAL WINDOW
+        function executePython() {
+            const f = files[rightClickIdx];
+            
+            // Open window immediately
+            const win = window.open('about:blank', '_blank');
+            if(!win) {
+                showToast("Pop-up blocked! Allow pop-ups to run code.", "error");
+                return;
+            }
+
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Python Terminal: ${f.name}</title>
+                    <style>
+                        body { background: #0d1117; color: #c9d1d9; font-family: 'Consolas', monospace; padding: 20px; margin: 0; }
+                        #output { white-space: pre-wrap; word-wrap: break-word; }
+                        .error { color: #f85149; }
+                        .status { color: #8b949e; font-style: italic; margin-bottom: 10px; border-bottom: 1px solid #30363d; padding-bottom: 10px; display:block; }
+                    </style>
+                    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"><\/script>
+                    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"><\/script>
+                </head>
+                <body>
+                    <span class="status" id="status">Initializing Environment...</span>
+                    <div id="output"></div>
+                    <script>
+                        const code = ${JSON.stringify(f.content)};
+                        const statusEl = document.getElementById('status');
+                        const outputEl = document.getElementById('output');
+
+                        function outf(text) { 
+                            outputEl.innerText += text; 
+                        }
+                        
+                        function builtinRead(x) {
+                            if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                                throw "File not found: '" + x + "'";
+                            return Sk.builtinFiles["files"][x];
+                        }
+
+                        // Wait for libs to load then run
+                        window.onload = function() {
+                            statusEl.innerText = "Running...";
+                            
+                            Sk.pre = "output";
+                            Sk.configure({ output: outf, read: builtinRead });
+
+                            Sk.misceval.asyncToPromise(function() {
+                                return Sk.importMainWithBody("<stdin>", false, code, true);
+                            }).then(function() {
+                                statusEl.innerText = "Program Finished";
+                            }, function(err) {
+                                statusEl.innerText = "Execution Error";
+                                const errDiv = document.createElement('div');
+                                errDiv.className = 'error';
+                                errDiv.innerText = "\\n" + err.toString();
+                                outputEl.appendChild(errDiv);
+                            });
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        }
+
+        // MARKDOWN PREVIEW (MARKED)
+        function previewMarkdown() {
+            const f = files[rightClickIdx];
+            loadLib('marked-lib', 'https://cdn.jsdelivr.net/npm/marked/marked.min.js', () => {
+                const html = marked.parse(f.content);
+                const win = window.open('about:blank', '_blank');
+                win.document.write(`
+                    <html><head><title>Markdown Preview: ${f.name}</title>
+                    <style>body{font-family:system-ui;padding:20px;max-width:800px;margin:0 auto;}</style>
+                    </head><body>${html}</body></html>
+                `);
+                win.document.close();
+            });
         }
 
         function render() {
@@ -824,16 +1014,12 @@ Happy Coding!
             
             const type = files[activeIdx].type;
             const langMap = {
-                'html': 'xml',
-                'css': 'css',
-                'js': 'javascript',
-                'json': 'json',
-                'txt': 'plaintext'
+                'html': 'xml', 'css': 'css', 'js': 'javascript', 'json': 'json', 'py': 'python',
+                'md': 'markdown', 'txt': 'plaintext'
             };
             const lang = langMap[type] || 'plaintext';
             
             let highlightedHTML = "";
-            
             if (val.trim() === "") {
                 highlightedHTML = "";
             } else {
@@ -845,9 +1031,7 @@ Happy Coding!
             }
             
             hl.innerHTML = highlightedHTML + "\n";
-            // Update minimap content
             minimapContent.innerText = val;
-            
             updateGutter();
         }
 
@@ -855,7 +1039,12 @@ Happy Coding!
             const lines = textarea.value.split('\n');
             const gutter = document.getElementById('gutter');
             const measure = document.createElement('div');
-            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;`;
+            const isNoWrap = document.getElementById('scroll').classList.contains('no-wrap');
+            const wrapStyle = isNoWrap ? 
+                'white-space: pre !important; word-wrap: normal !important;' : 
+                'white-space: pre-wrap; word-wrap: break-word;';
+                
+            measure.style.cssText = `position: absolute; visibility: hidden; width: ${textarea.clientWidth - 40}px; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; ${wrapStyle}`;
             document.body.appendChild(measure);
             let gutterHTML = "";
             lines.forEach((lineText, i) => {
@@ -879,7 +1068,6 @@ Happy Coding!
                 textarea.selectionStart = textarea.selectionEnd = start + 1;
                 handleInput(textarea.value);
             }
-            // Add Find shortcut
             if((e.ctrlKey || e.metaKey) && e.key === 'f') {
                 e.preventDefault();
                 document.getElementById('find-widget').style.display = 'flex';
@@ -892,41 +1080,21 @@ Happy Coding!
 
         function sync() { 
             const scroller = document.getElementById('scroll');
-            // Sync Gutter
             document.getElementById('gutter').scrollTop = scroller.scrollTop; 
             
-            // Sync Minimap Viewport
             const scrollPercent = scroller.scrollTop / scroller.scrollHeight;
             const viewportHeight = scroller.clientHeight;
-            const contentHeight = scroller.scrollHeight;
-            
-            // Calculate height of viewport indicator on minimap
-            // The minimap shows the full content compressed by SCALE
-            // The viewport indicator should represent the visible area
             
             let mapViewportHeight = viewportHeight * SCALE;
-            // Cap it if it's too big (shouldn't happen if CSS is right) or too small
             if(mapViewportHeight < 20) mapViewportHeight = 20;
 
-            // Calculate top position
             let topPos = scroller.scrollTop * SCALE;
-            
             minimapViewport.style.height = mapViewportHeight + 'px';
             minimapViewport.style.top = topPos + 'px';
             
-            // Sync Minimap Content Scroll (if content is longer than minimap container)
-            // But for this simple implementation, we assume minimap container scrolls content?
-            // Actually, best approach for VS Code style:
-            // Minimap shows a window of the code. 
-            // Let's scroll the minimap content upwards so the viewport stays relatively centered or visible
-            
-            // Simplified approach: Just move content up based on scroll
             if(minimapContent.clientHeight * SCALE > minimap.clientHeight) {
-               // Complex scroll syncing is hard without a virtual scroll.
-               // Let's just scroll the minimap content relative to main scroll
                const mapScrollMax = (minimapContent.clientHeight * SCALE) - minimap.clientHeight;
                const mainScrollMax = scroller.scrollHeight - scroller.clientHeight;
-               
                if(mainScrollMax > 0) {
                    const ratio = scroller.scrollTop / mainScrollMax;
                    minimapContent.style.top = `-${ratio * mapScrollMax}px`;
@@ -940,50 +1108,19 @@ Happy Coding!
 
         let isDraggingMap = false;
 
-        minimap.addEventListener('mousedown', (e) => {
-            isDraggingMap = true;
-            moveMinimap(e);
-        });
-
-        window.addEventListener('mouseup', () => {
-            isDraggingMap = false;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if(isDraggingMap) {
-                e.preventDefault();
-                moveMinimap(e);
-            }
-        });
+        minimap.addEventListener('mousedown', (e) => { isDraggingMap = true; moveMinimap(e); });
+        window.addEventListener('mouseup', () => { isDraggingMap = false; });
+        window.addEventListener('mousemove', (e) => { if(isDraggingMap) { e.preventDefault(); moveMinimap(e); } });
 
         function moveMinimap(e) {
             const rect = minimap.getBoundingClientRect();
             const clickY = e.clientY - rect.top;
-            
-            // We need to translate this Y position on the minimap back to the main scroll position
-            // Logic: Click Y / Scale = Text Y.
-            // But we also need to center the view on the click if possible
-            
             const scroller = document.getElementById('scroll');
             
-            // If minimap content is scrolling (long file), adjustment is needed. 
-            // For simplicity in this lightweight IDE, we'll map absolute position if small, or relative if large.
-            
-            // Let's use the Ratio approach which is robust
-            // Where is the click relative to the *visible* minimap height?
-            // Actually, standard behavior: Click jump to that visual spot.
-            
-            // Adjusted logic considering the simplified sync() above:
-            // Text is scaled by 0.15. 
-            // So 1px on minimap = 1/0.15 = 6.66px on main text.
-            
-            // If minimap fits entirely:
             if(minimapContent.clientHeight * SCALE <= minimap.clientHeight) {
-                const targetScroll = (clickY / SCALE) - (scroller.clientHeight / 2); // Center view
+                const targetScroll = (clickY / SCALE) - (scroller.clientHeight / 2); 
                 scroller.scrollTop = targetScroll;
             } else {
-                // If minimap scrolls, it's tricker. 
-                // Let's calculate percentage of click down the container
                 const percent = clickY / minimap.clientHeight;
                 const targetScroll = percent * (scroller.scrollHeight - scroller.clientHeight);
                  scroller.scrollTop = targetScroll;
@@ -996,34 +1133,24 @@ Happy Coding!
         function findNext() {
             const term = document.getElementById('find-input').value;
             if(!term) return;
-            
             const text = textarea.value;
-            // Search from current position
             let startPos = textarea.selectionEnd;
             let index = text.indexOf(term, startPos);
-            
-            // Wrap around
             if(index === -1) index = text.indexOf(term, 0);
             
             if(index !== -1) {
                 textarea.focus();
                 textarea.setSelectionRange(index, index + term.length);
-                
-                // Scroll to view
                 const lines = text.substr(0, index).split('\n');
                 const lineNum = lines.length;
                 const lineHeight = 21; // Approx
                 document.getElementById('scroll').scrollTop = (lineNum - 5) * lineHeight; 
-            } else {
-                showToast("No matches found");
-            }
+            } else { showToast("No matches found"); }
         }
 
         function replaceOne() {
             const term = document.getElementById('find-input').value;
             const rep = document.getElementById('replace-input').value;
-            
-            // Only replace if currently selected matches
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const selectedText = textarea.value.substring(start, end);
@@ -1034,48 +1161,32 @@ Happy Coding!
                 textarea.value = newText;
                 handleInput(newText);
                 textarea.setSelectionRange(start, start + rep.length);
-                findNext(); // Go to next
-            } else {
-                findNext(); // Find one first
-            }
+                findNext();
+            } else { findNext(); }
         }
 
         function replaceAll() {
             const term = document.getElementById('find-input').value;
             const rep = document.getElementById('replace-input').value;
             if(!term) return;
-            
             const text = textarea.value;
             const newText = text.split(term).join(rep);
             if(text !== newText) {
                 textarea.value = newText;
                 handleInput(newText);
                 showToast("Replaced all occurrences");
-            } else {
-                showToast("Nothing to replace");
-            }
+            } else { showToast("Nothing to replace"); }
         }
 
         function gotoLine() {
             const num = parseInt(document.getElementById('goto-input').value);
             if(!num) return;
-            
             const lines = textarea.value.split('\n');
-            if(num < 1 || num > lines.length) {
-                showToast(`Line ${num} not found`, 'error');
-                return;
-            }
-            
-            // Calculate char position approx
+            if(num < 1 || num > lines.length) { showToast(`Line ${num} not found`, 'error'); return; }
             let charPos = 0;
-            for(let i=0; i < num-1; i++) {
-                charPos += lines[i].length + 1; // +1 for newline
-            }
-            
+            for(let i=0; i < num-1; i++) charPos += lines[i].length + 1;
             textarea.focus();
             textarea.setSelectionRange(charPos, charPos);
-            
-            // Scroll
             const lineHeight = 21;
             document.getElementById('scroll').scrollTop = (num - 10) * lineHeight;
         }
