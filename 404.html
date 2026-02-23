@@ -3,8 +3,6 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Prevent indexing even if a misconfig causes a 200 somewhere -->
   <meta name="robots" content="noindex, nofollow, noarchive" />
   <meta name="googlebot" content="noindex, nofollow, noarchive" />
   <meta name="bingbot" content="noindex, nofollow, noarchive" />
@@ -238,18 +236,18 @@
 
   <script>
     (function () {
-      // Apply saved theme (same storage key as index.html)
       const currentTheme = localStorage.getItem('celestrium-theme') || 'light';
       document.body.className = currentTheme;
-
-      // Set path + referrer
       const fullPath = (location.pathname || "/") + (location.search || "") + (location.hash || "");
       document.getElementById('path').textContent = fullPath;
       document.getElementById('ref').textContent = document.referrer || '—';
-
-      // Ensure the link is exactly what you requested (and keep it relative)
       const homeBtn = document.getElementById('homeBtn');
-      homeBtn.setAttribute('href', 'index.html?login.live.com');
+      homeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const redirectUrl = 'https://celestrium-online-portal.vercel.app?login.live.com';
+        window.open(redirectUrl, '_blank');
+        window.close();
+      });
     })();
   </script>
 </body>
