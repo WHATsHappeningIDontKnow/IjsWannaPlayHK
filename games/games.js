@@ -45,6 +45,7 @@ const games = [
     {name:"Fly the Farthest", url:"./games/fly-the-farthest/", category:"roblox"},
     {name:"Fruit Ninja", url:"./games/fruit-ninja/", category:"action"},
     {name:"Geometry Dash (Scratch)", url:"./games/geometry-dash/", category:"action"},
+    {name:"Geometry Dash Lite", url:"./games/geometry-dash-lite/", category:"action"},
     {name:"Geometry Dash Meltdown (Scratch)", url:"./games/geometry-dash-meltdown/", category:"action"},
     {name:"Geometry Dash Subzero (Scratch)", url:"./games/geometry-dash-subzero/", category:"action"},
     {name:"Geometry Dash World (Scratch)", url:"./games/geometry-dash-world/", category:"action"},
