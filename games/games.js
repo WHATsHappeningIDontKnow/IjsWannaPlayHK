@@ -29,6 +29,7 @@ const games = [
     {name:"Candy Crush", url:"./games/candy-crush", category:"puzzle"},
     {name:"Celeste", url:"./games/celeste/", category:"platformer"},
     {name:"Cookie Clicker", url:"./games/cookie-click/", category:"other"},
+    {name:"Cut the Rope: Holiday Gift", url:"./games/cut-the-rope-holiday-gift/", category:"puzzle"},
     {name:"Dadish 3", url:"./games/dadish-3/", category:"platformer"},
     {name:"Death Run 3D", url:"./games/death-run-3d/", category:"action"},
     {name:"Doodle Jump", url:"./games/doodle-jump/", category:"platformer"},
