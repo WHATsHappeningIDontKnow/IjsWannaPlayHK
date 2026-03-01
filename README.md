@@ -16,6 +16,7 @@ Games are organized into a searchable, curated library. Links open in a lightwei
 ## Changelog (Major Updates Only)
 
 - v5 — Major UI Overhaul
+    - v5.4 - Lots More Utilities & Games
     - v5.3 - Add 404 Page
     - v5.2 — Add Many Utilties
     - v5.1 — Search Algorithm & Card Display Mechanism Rework
